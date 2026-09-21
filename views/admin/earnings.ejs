@@ -1,0 +1,43 @@
+<h1 class="text-2xl font-bold text-cocoa mb-6">My Earnings</h1>
+
+<div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8">
+  <div class="card p-5">
+    <p class="text-xs text-cocoa-light uppercase tracking-wide">Today</p>
+    <p class="text-xl font-bold text-cocoa mt-1">&#8358;<%= Number(totals.today).toLocaleString() %></p>
+  </div>
+  <div class="card p-5">
+    <p class="text-xs text-cocoa-light uppercase tracking-wide">This Week</p>
+    <p class="text-xl font-bold text-cocoa mt-1">&#8358;<%= Number(totals.thisWeek).toLocaleString() %></p>
+  </div>
+  <div class="card p-5">
+    <p class="text-xs text-cocoa-light uppercase tracking-wide">All Time</p>
+    <p class="text-xl font-bold text-cocoa mt-1">&#8358;<%= Number(totals.allTime).toLocaleString() %></p>
+  </div>
+  <div class="card p-5">
+    <p class="text-xs text-cocoa-light uppercase tracking-wide">Unpaid Out</p>
+    <p class="text-xl font-bold text-caramel-dark mt-1">&#8358;<%= Number(totals.unpaid).toLocaleString() %></p>
+  </div>
+</div>
+
+<div class="card overflow-x-auto">
+  <table class="w-full text-sm">
+    <thead class="bg-dough/40 text-cocoa-light text-left">
+      <tr><th class="px-4 py-3">Delivered</th><th class="px-4 py-3">Recipient</th><th class="px-4 py-3">Payout</th><th class="px-4 py-3">Status</th></tr>
+    </thead>
+    <tbody>
+      <% completed.forEach(function(s) { %>
+        <tr class="border-t border-dough/60">
+          <td class="px-4 py-3 text-cocoa-light"><%= new Date(s.deliveredAt).toLocaleDateString() %></td>
+          <td class="px-4 py-3 text-cocoa"><%= s.recipientName %></td>
+          <td class="px-4 py-3 font-semibold text-cocoa">&#8358;<%= Number(s.riderPayout).toLocaleString() %></td>
+          <td class="px-4 py-3">
+            <span class="text-xs font-semibold px-2 py-1 rounded-full <%= s.payoutStatus === 'paid' ? 'bg-forest/10 text-forest' : 'bg-caramel/10 text-caramel-dark' %>"><%= s.payoutStatus %></span>
+          </td>
+        </tr>
+      <% }); %>
+      <% if (!completed.length) { %>
+        <tr><td colspan="4" class="px-4 py-8 text-center text-cocoa-light">No completed deliveries yet.</td></tr>
+      <% } %>
+    </tbody>
+  </table>
+</div>

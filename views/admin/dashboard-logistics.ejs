@@ -1,0 +1,39 @@
+<h1 class="text-2xl font-bold text-cocoa mb-6">Logistics Dashboard</h1>
+
+<div class="grid grid-cols-2 sm:grid-cols-4 gap-5 mb-8">
+  <a href="/admin/logistics/queue" class="card p-5 hover:shadow-md transition-shadow">
+    <p class="text-xs text-cocoa-light uppercase tracking-wide">Awaiting Dispatch</p>
+    <p class="text-2xl font-bold text-caramel-dark mt-2"><%= awaitingDispatch %></p>
+  </a>
+  <a href="/admin/logistics/queue" class="card p-5 hover:shadow-md transition-shadow">
+    <p class="text-xs text-cocoa-light uppercase tracking-wide">Assigned, Not Yet Moving</p>
+    <p class="text-2xl font-bold text-cocoa mt-2"><%= assigned %></p>
+  </a>
+  <a href="/admin/logistics/queue" class="card p-5 hover:shadow-md transition-shadow">
+    <p class="text-xs text-cocoa-light uppercase tracking-wide">Out for Delivery</p>
+    <p class="text-2xl font-bold text-forest mt-2"><%= outForDelivery %></p>
+  </a>
+  <div class="card p-5">
+    <p class="text-xs text-cocoa-light uppercase tracking-wide">Delivered Today</p>
+    <p class="text-2xl font-bold text-cocoa mt-2"><%= deliveredToday %></p>
+  </div>
+</div>
+
+<a href="/admin/logistics/book" class="btn-primary inline-flex mb-8 !py-2 text-sm">+ Book Walk-in Delivery</a>
+
+<div class="card p-6">
+  <h2 class="font-bold text-cocoa mb-4">Needs a Rider</h2>
+  <% if (!recentShipments.length) { %>
+    <p class="text-sm text-cocoa-light">Nothing waiting right now.</p>
+  <% } else { %>
+    <div class="space-y-2">
+      <% recentShipments.forEach(function(s) { %>
+        <div class="flex items-center justify-between text-sm border-b border-dough/60 pb-2">
+          <span class="text-cocoa"><%= s.recipientName %> <span class="text-cocoa-light">&middot; <%= s.pickupBranch ? s.pickupBranch.name : '—' %></span></span>
+          <span class="text-xs font-semibold uppercase px-2 py-1 rounded-full <%= s.status === 'awaiting_dispatch' ? 'bg-caramel/10 text-caramel-dark' : 'bg-dough text-cocoa-light' %>"><%= s.status.replace(/_/g, ' ') %></span>
+        </div>
+      <% }); %>
+    </div>
+    <a href="/admin/logistics/queue" class="text-caramel font-semibold text-sm mt-4 inline-block">View Full Queue &rarr;</a>
+  <% } %>
+</div>

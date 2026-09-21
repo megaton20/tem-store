@@ -1,0 +1,92 @@
+<section class="max-w-2xl mx-auto px-5 sm:px-8 py-16">
+  <h1 class="text-4xl font-bold text-cocoa mb-3">Ride for TEM Store</h1>
+  <p class="text-cocoa-light mb-8">Deliver Second Nature cookies and more across Calabar. Flexible hours, weekly pay.</p>
+
+  <div class="card p-6 mb-10">
+    <h2 class="font-bold text-cocoa mb-4">Requirements</h2>
+    <ul class="space-y-2 text-sm text-cocoa-light">
+      <li class="flex gap-2"><span class="text-forest">&check;</span> A valid government-issued ID</li>
+      <li class="flex gap-2"><span class="text-forest">&check;</span> A smartphone to receive delivery assignments</li>
+      <li class="flex gap-2"><span class="text-forest">&check;</span> Your own bicycle, motorcycle, or car (state which when applying)</li>
+      <li class="flex gap-2"><span class="text-forest">&check;</span> Familiarity with Calabar streets and landmarks</li>
+      <li class="flex gap-2"><span class="text-forest">&check;</span> Reliable and punctual — customers are waiting</li>
+    </ul>
+  </div>
+
+  <% if (submitted) { %>
+    <div class="card p-8 text-center">
+      <p class="text-forest font-bold text-lg">Application received!</p>
+      <p class="text-cocoa-light mt-2 text-sm">We'll review your application and reach out if it's a match. Thanks for your interest in riding with TEM Store.</p>
+    </div>
+  <% } else if (existing && existing.status === 'pending') { %>
+    <div class="card p-8 text-center">
+      <p class="text-caramel-dark font-bold text-lg">Application Under Review</p>
+      <p class="text-cocoa-light mt-2 text-sm">You applied on <%= new Date(existing.createdAt).toLocaleDateString() %> — we'll reach out once it's been reviewed.</p>
+    </div>
+  <% } else if (existing && existing.status === 'approved') { %>
+    <div class="card p-8 text-center">
+      <p class="text-forest font-bold text-lg">You're already a rider!</p>
+      <p class="text-cocoa-light mt-2 text-sm">Log in and head to your dashboard to see your deliveries.</p>
+    </div>
+  <% } else { %>
+    <% if (errors && errors.length) { %>
+      <div class="bg-caramel-dark/10 border border-caramel-dark/30 text-caramel-dark rounded-xl px-4 py-3 mb-6 text-sm">
+        <ul class="list-disc list-inside"><% errors.forEach(function(e) { %><li><%= e %></li><% }); %></ul>
+      </div>
+    <% } %>
+    <% if (existing && existing.status === 'rejected') { %>
+      <div class="bg-dough/50 rounded-xl px-4 py-3 mb-6 text-sm text-cocoa-light">Your previous application wasn't accepted, but you're welcome to apply again below.</div>
+    <% } %>
+    <form action="/apply/rider" method="POST" class="card p-6 space-y-4">
+      <div class="bg-dough/30 rounded-xl p-4 text-sm text-cocoa-light">
+        Applying as <span class="text-cocoa font-medium"><%= currentUser.fullName %></span> (<%= currentUser.email %>, <%= currentUser.phone %>)
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-cocoa mb-2">Address</label>
+        <input type="text" name="address" required value="<%= old.address || '' %>" class="input-field">
+      </div>
+      <div class="grid sm:grid-cols-2 gap-4">
+        <div>
+          <label class="block text-sm font-medium text-cocoa mb-2">City</label>
+          <select name="city" required class="input-field">
+            <option value="">Select a city</option>
+            <% cities.forEach(function(c) { %><option value="<%= c %>" <%= old.city === c ? 'selected' : '' %>><%= c %></option><% }); %>
+          </select>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-cocoa mb-2">State</label>
+          <select name="state" required class="input-field">
+            <option value="">Select a state</option>
+            <% states.forEach(function(s) { %><option value="<%= s %>" <%= (old.state || 'Cross River') === s ? 'selected' : '' %>><%= s %></option><% }); %>
+          </select>
+        </div>
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-cocoa mb-2">What will you be riding/driving?</label>
+        <select name="vehicleType" required class="input-field">
+          <option value="bicycle">Bicycle</option>
+          <option value="motorcycle">Motorcycle</option>
+          <option value="car">Car</option>
+          <option value="none">None yet</option>
+        </select>
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-cocoa mb-2">Years of delivery/riding experience (optional)</label>
+        <input type="number" name="yearsExperience" class="input-field">
+      </div>
+      <div class="flex items-center gap-2">
+        <input type="checkbox" name="hasValidId" id="hasValidId" required>
+        <label for="hasValidId" class="text-sm text-cocoa">I have a valid government-issued ID</label>
+      </div>
+      <div class="flex items-center gap-2">
+        <input type="checkbox" name="hasSmartphone" id="hasSmartphone">
+        <label for="hasSmartphone" class="text-sm text-cocoa">I have a smartphone</label>
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-cocoa mb-2">Anything else we should know?</label>
+        <textarea name="notes" rows="3" class="input-field"></textarea>
+      </div>
+      <button type="submit" class="btn-primary w-full">Submit Application</button>
+    </form>
+  <% } %>
+</section>

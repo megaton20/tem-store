@@ -1,0 +1,38 @@
+<h1 class="text-2xl font-bold text-cocoa mb-1">New Production Batch</h1>
+<p class="text-sm text-cocoa-light mb-6">Records a production run and generates one unique, single-use verification code per unit — customers can check any of them at <a href="/verify" target="_blank" class="text-caramel font-semibold">/verify</a>.</p>
+
+<% if (errors && errors.length) { %>
+  <div class="bg-caramel-dark/10 border border-caramel-dark/30 text-caramel-dark rounded-xl px-4 py-3 mb-6 text-sm">
+    <ul class="list-disc list-inside"><% errors.forEach(function(e) { %><li><%= e %></li><% }); %></ul>
+  </div>
+<% } %>
+
+<form action="/admin/batches" method="POST" class="card p-6 max-w-lg space-y-4">
+  <div>
+    <label class="block text-sm font-medium text-cocoa mb-2">Product</label>
+    <select name="productId" required class="input-field">
+      <% products.forEach(function(p) { %><option value="<%= p.id %>"><%= p.name %></option><% }); %>
+    </select>
+  </div>
+
+  <% if (!ownBranchId) { %>
+    <div>
+      <label class="block text-sm font-medium text-cocoa mb-2">Branch (stock lands here)</label>
+      <select name="branchId" required class="input-field">
+        <% branches.forEach(function(b) { %><option value="<%= b.id %>"><%= b.name %></option><% }); %>
+      </select>
+    </div>
+  <% } %>
+
+  <div>
+    <label class="block text-sm font-medium text-cocoa mb-2">Quantity Produced</label>
+    <input type="number" name="quantity" min="1" required class="input-field">
+  </div>
+
+  <div>
+    <label class="block text-sm font-medium text-cocoa mb-2">Notes (optional)</label>
+    <input type="text" name="notes" class="input-field" placeholder="e.g. Morning run">
+  </div>
+
+  <button type="submit" class="btn-primary w-full">Create Batch & Generate Codes</button>
+</form>

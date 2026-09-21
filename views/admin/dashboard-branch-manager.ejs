@@ -1,0 +1,39 @@
+<h1 class="text-2xl font-bold text-cocoa mb-6">Branch Dashboard</h1>
+
+<div class="grid grid-cols-2 sm:grid-cols-5 gap-5 mb-8">
+  <a href="/admin/orders" class="card p-5 hover:shadow-md transition-shadow">
+    <p class="text-xs text-cocoa-light uppercase tracking-wide">Orders Needing Attention</p>
+    <p class="text-2xl font-bold text-cocoa mt-2"><%= pendingOrders %></p>
+  </a>
+  <a href="/admin/inventory" class="card p-5 hover:shadow-md transition-shadow">
+    <p class="text-xs text-cocoa-light uppercase tracking-wide">Low Stock Items</p>
+    <p class="text-2xl font-bold <%= lowStockItems.length ? 'text-caramel-dark' : 'text-cocoa' %> mt-2"><%= lowStockItems.length %></p>
+  </a>
+  <a href="/admin/transfers" class="card p-5 hover:shadow-md transition-shadow">
+    <p class="text-xs text-cocoa-light uppercase tracking-wide">Pending Transfers</p>
+    <p class="text-2xl font-bold <%= pendingIncomingTransfers ? 'text-caramel-dark' : 'text-cocoa' %> mt-2"><%= pendingIncomingTransfers %></p>
+  </a>
+  <a href="/admin/logistics/process" class="card p-5 hover:shadow-md transition-shadow">
+    <p class="text-xs text-cocoa-light uppercase tracking-wide">Awaiting Shipment</p>
+    <p class="text-2xl font-bold text-cocoa mt-2"><%= awaitingShipment %></p>
+  </a>
+  <div class="card p-5">
+    <p class="text-xs text-cocoa-light uppercase tracking-wide">POS Sales Today</p>
+    <p class="text-2xl font-bold text-cocoa mt-2"><%= todaysPosSales %></p>
+    <p class="text-xs text-cocoa-light mt-1">&#8358;<%= Number(todaysPosTotal).toLocaleString() %></p>
+  </div>
+</div>
+
+<% if (lowStockItems.length) { %>
+  <div class="card p-6">
+    <h2 class="font-bold text-cocoa mb-4">Low Stock at Your Branch</h2>
+    <div class="space-y-2">
+      <% lowStockItems.forEach(function(item) { %>
+        <div class="flex items-center justify-between text-sm border-b border-dough/60 pb-2">
+          <span class="text-cocoa"><%= item.Product ? item.Product.name : 'Unknown product' %></span>
+          <span class="font-semibold text-caramel-dark"><%= item.quantity %> left</span>
+        </div>
+      <% }); %>
+    </div>
+  </div>
+<% } %>

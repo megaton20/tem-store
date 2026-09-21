@@ -1,0 +1,22 @@
+<div class="max-w-lg">
+  <div class="card p-8 text-center">
+    <p class="text-forest font-bold text-lg">Delivery Booked</p>
+    <p class="text-cocoa-light text-sm mt-1">From <%= shipment.pickupBranch ? shipment.pickupBranch.name : '—' %></p>
+
+    <div class="bg-dough/40 rounded-xl p-4 mt-6 text-left space-y-2 text-sm">
+      <div class="flex justify-between"><span class="text-cocoa-light">Sender</span><span class="text-cocoa font-medium"><%= shipment.senderName %></span></div>
+      <div class="flex justify-between"><span class="text-cocoa-light">Recipient</span><span class="text-cocoa font-medium"><%= shipment.recipientName %></span></div>
+      <div class="flex justify-between"><span class="text-cocoa-light">Destination</span><span class="text-cocoa font-medium"><%= shipment.deliveryCity %>, <%= shipment.deliveryState %></span></div>
+      <div class="flex justify-between"><span class="text-cocoa-light">Package</span><span class="text-cocoa font-medium capitalize"><%= shipment.packageSize %></span></div>
+      <div class="flex justify-between"><span class="text-cocoa-light">Fee</span><span class="text-cocoa font-medium">&#8358;<%= Number(shipment.fee).toLocaleString() %></span></div>
+      <div class="flex justify-between"><span class="text-cocoa-light">Payment</span><span class="text-cocoa font-medium capitalize"><%= shipment.paymentStatus %> <% if (shipment.paymentMethod) { %>(<%= shipment.paymentMethod.replace('_',' ') %>)<% } %></span></div>
+    </div>
+
+    <div class="mt-6 bg-caramel/10 border border-caramel/30 rounded-xl p-4">
+      <p class="text-sm text-cocoa-light">Give this code to the sender — the recipient will need to give it to the rider on delivery.</p>
+      <p class="text-2xl font-bold text-caramel-dark tracking-widest mt-1"><%= shipment.confirmationCode %></p>
+    </div>
+
+    <a href="/admin/logistics/book" class="btn-secondary inline-flex mt-6">Book Another</a>
+  </div>
+</div>

@@ -1,0 +1,20 @@
+<section class="max-w-6xl mx-auto px-5 sm:px-8 py-16">
+  <h1 class="text-4xl font-bold text-cocoa mb-3">Our Team</h1>
+  <p class="text-cocoa-light mb-10">The people building TEM Store, kiosk by kiosk.</p>
+
+  <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
+    <% members.forEach(function(m) { %>
+      <div class="text-center">
+        <div class="aspect-square rounded-2xl bg-dough/40 overflow-hidden mb-4">
+          <img src="<%= m.photoUrl %>" alt="<%= m.name %>" class="w-full h-full object-cover" onerror="this.src='https://via.placeholder.com/400/EFE0C8/3A2317?text=TEM'">
+        </div>
+        <p class="font-bold text-cocoa"><%= m.name %></p>
+        <p class="text-sm text-caramel-dark font-medium"><%= m.role %></p>
+        <% if (m.bio) { %><p class="text-sm text-cocoa-light mt-2"><%= m.bio %></p><% } %>
+      </div>
+    <% }); %>
+    <% if (!members.length) { %>
+      <p class="text-cocoa-light col-span-full">Team profiles coming soon.</p>
+    <% } %>
+  </div>
+</section>

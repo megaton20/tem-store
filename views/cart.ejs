@@ -1,0 +1,39 @@
+<section class="max-w-4xl mx-auto px-5 sm:px-8 py-12">
+  <h1 class="text-3xl font-bold text-cocoa mb-8">Your Cart</h1>
+
+  <% if (!items.length) { %>
+    <div class="card p-10 text-center">
+      <p class="text-cocoa-light">Your cart is empty.</p>
+      <a href="/shop" class="btn-primary inline-flex mt-6">Start Shopping</a>
+    </div>
+  <% } else { %>
+    <div class="space-y-4">
+      <% items.forEach(function(item) { %>
+        <div class="card p-4 flex items-center gap-4">
+          <img src="<%= item.Product.imageUrl %>" alt="<%= item.Product.name %>" class="w-20 h-20 object-contain bg-dough/40 rounded-xl p-2" onerror="this.src='https://via.placeholder.com/100/EFE0C8/3A2317?text=TEM'">
+          <div class="flex-1">
+            <a href="/product/<%= item.Product.slug %>" class="font-semibold text-cocoa hover:text-caramel"><%= item.Product.name %></a>
+            <p class="text-sm text-cocoa-light">&#8358;<%= Number(item.unitPrice).toLocaleString() %> each</p>
+          </div>
+          <form action="/cart/<%= item.id %>/update" method="POST" class="flex items-center gap-2">
+            <input type="number" name="quantity" value="<%= item.quantity %>" min="0" class="input-field !w-16 !py-2 text-center">
+            <button type="submit" class="btn-secondary !py-2 !px-3 text-xs">Update</button>
+          </form>
+          <p class="font-semibold text-cocoa w-24 text-right">&#8358;<%= (Number(item.unitPrice) * item.quantity).toLocaleString() %></p>
+          <form action="/cart/<%= item.id %>/remove" method="POST">
+            <button type="submit" class="text-cocoa-light hover:text-caramel-dark" aria-label="Remove">&times;</button>
+          </form>
+        </div>
+      <% }); %>
+    </div>
+
+    <div class="card p-6 mt-8 flex items-center justify-between">
+      <div>
+        <p class="text-sm text-cocoa-light">Subtotal</p>
+        <p class="text-2xl font-bold text-cocoa">&#8358;<%= Number(subtotal).toLocaleString() %></p>
+      </div>
+      <a href="/checkout" class="btn-primary">Proceed to Checkout</a>
+    </div>
+    <p class="text-xs text-cocoa-light mt-3">Delivery fee (if applicable) is calculated at checkout.</p>
+  <% } %>
+</section>

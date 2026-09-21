@@ -1,0 +1,15 @@
+<h1 class="text-2xl font-bold text-cocoa mb-1">Role Guides</h1>
+<p class="text-sm text-cocoa-light mb-6">What every department does, and where their responsibilities start and stop.</p>
+
+<div class="grid sm:grid-cols-2 gap-4" data-skeleton="cards">
+  <% Object.keys(departments).forEach(function(key) { %>
+    <% const dept = departments[key]; %>
+    <a href="/admin/docs/<%= key %>" class="card p-5 hover:shadow-md transition-shadow <%= key === ownRole ? 'ring-2 ring-caramel' : '' %>">
+      <div class="flex items-center justify-between mb-2">
+        <p class="font-bold text-cocoa"><%= dept.label %></p>
+        <% if (key === ownRole) { %><span class="text-xs font-semibold uppercase text-caramel-dark bg-caramel/10 px-2 py-1 rounded-full">Your Role</span><% } %>
+      </div>
+      <p class="text-sm text-cocoa-light"><%= dept.tagline %></p>
+    </a>
+  <% }); %>
+</div>

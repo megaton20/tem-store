@@ -1,0 +1,29 @@
+<section class="bg-vault min-h-[70vh]">
+  <div class="max-w-2xl mx-auto px-5 sm:px-8 py-20 text-center">
+    <span class="inline-flex items-center gap-2 border border-vault-gold/40 text-vault-gold text-xs font-semibold uppercase tracking-widest px-4 py-2 rounded-full">
+      By Invitation of Membership
+    </span>
+    <h1 class="text-4xl sm:text-5xl font-bold text-cream mt-6">The TEM Vault</h1>
+    <p class="text-cream/60 mt-4 max-w-md mx-auto">Gold, diamonds, and pieces we don't put on the open shelf. Six months of access, renewed on your terms.</p>
+
+    <% if (currentSub) { %>
+      <div class="mt-10 bg-cream/5 border border-vault-gold/20 rounded-2xl p-6">
+        <p class="text-vault-gold font-semibold">You already have access.</p>
+        <p class="text-cream/60 text-sm mt-1">Valid until <%= new Date(currentSub.expiresAt).toLocaleDateString() %></p>
+        <a href="/vault" class="btn-forest mt-6 inline-flex !bg-vault-gold !text-vault hover:!bg-vault-gold/90">Enter the Vault</a>
+      </div>
+    <% } else if (tier) { %>
+      <form action="/vault/subscribe" method="POST" class="mt-10 bg-cream/5 border border-vault-gold/20 rounded-2xl p-8 inline-block text-left">
+        <input type="hidden" name="tierId" value="<%= tier.id %>">
+        <p class="text-cream font-bold text-xl"><%= tier.name %></p>
+        <p class="text-vault-gold text-3xl font-bold mt-2">&#8358;<%= Number(tier.price).toLocaleString() %></p>
+        <p class="text-cream/50 text-sm mt-1">for <%= tier.durationMonths %> months of access &middot; <%= tier.gracePeriodDays %>-day grace period on renewal</p>
+        <button type="submit" class="mt-6 w-full inline-flex items-center justify-center gap-2 bg-vault-gold hover:bg-vault-gold/90 text-vault font-semibold px-6 py-3 rounded-full transition-colors">
+          Unlock with Paystack
+        </button>
+      </form>
+    <% } else { %>
+      <p class="text-cream/50 mt-10">Vault membership isn't available right now — check back soon.</p>
+    <% } %>
+  </div>
+</section>

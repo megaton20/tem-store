@@ -1,0 +1,34 @@
+<h1 class="text-2xl font-bold text-cocoa mb-6">Team</h1>
+
+<% if (errors && errors.length) { %>
+  <div class="bg-caramel-dark/10 border border-caramel-dark/30 text-caramel-dark rounded-xl px-4 py-3 mb-6 text-sm">
+    <ul class="list-disc list-inside"><% errors.forEach(function(e) { %><li><%= e %></li><% }); %></ul>
+  </div>
+<% } %>
+
+<div class="card p-6 mb-8">
+  <h2 class="font-bold text-cocoa mb-4">Add Team Member</h2>
+  <form action="/admin/team" method="POST" enctype="multipart/form-data" class="grid sm:grid-cols-2 gap-4">
+    <div><label class="block text-sm font-medium text-cocoa mb-2">Name</label><input type="text" name="name" required class="input-field"></div>
+    <div><label class="block text-sm font-medium text-cocoa mb-2">Role</label><input type="text" name="role" required class="input-field"></div>
+    <div class="sm:col-span-2"><label class="block text-sm font-medium text-cocoa mb-2">Bio</label><textarea name="bio" rows="2" class="input-field"></textarea></div>
+    <div><label class="block text-sm font-medium text-cocoa mb-2">Photo</label><input type="file" name="photoFile" accept="image/*" class="input-field"></div>
+    <div><label class="block text-sm font-medium text-cocoa mb-2">Sort Order</label><input type="number" name="sortOrder" value="0" class="input-field"></div>
+    <button type="submit" class="btn-primary sm:col-span-2">Add Team Member</button>
+  </form>
+</div>
+
+<div class="grid sm:grid-cols-3 gap-4">
+  <% members.forEach(function(m) { %>
+    <div class="card p-4 text-center">
+      <div class="aspect-square rounded-xl bg-dough/40 overflow-hidden mb-3">
+        <img src="<%= m.photoUrl %>" alt="<%= m.name %>" class="w-full h-full object-cover" onerror="this.src='https://via.placeholder.com/300/EFF4D8/233417?text=TEM'">
+      </div>
+      <p class="font-semibold text-cocoa"><%= m.name %></p>
+      <p class="text-xs text-caramel-dark"><%= m.role %></p>
+      <form action="/admin/team/<%= m.id %>/toggle" method="POST" class="mt-2">
+        <button type="submit" class="btn-secondary !py-1 !px-3 text-xs"><%= m.isActive ? 'Hide' : 'Show' %></button>
+      </form>
+    </div>
+  <% }); %>
+</div>

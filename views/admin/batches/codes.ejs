@@ -1,0 +1,21 @@
+<a href="/admin/batches" class="text-sm text-cocoa-light hover:text-cocoa">&larr; All Batches</a>
+
+<div class="flex items-center justify-between mt-4 mb-2">
+  <div>
+    <h1 class="text-2xl font-bold text-cocoa"><%= batch.batchNumber %></h1>
+    <p class="text-sm text-cocoa-light"><%= batch.Product.name %> &middot; <%= codes.length %> codes generated</p>
+  </div>
+  <a href="/admin/batches/<%= batch.id %>/codes.csv" class="btn-secondary !py-2 text-sm">Download CSV</a>
+</div>
+
+<div class="bg-forest/5 border border-forest/20 rounded-xl p-4 my-6 text-sm text-cocoa">
+  Print these onto labels/stickers for each unit. Each code works once — customers verify at <a href="/verify" target="_blank" class="text-caramel font-semibold">/verify</a>.
+</div>
+
+<div class="card p-4">
+  <div class="grid sm:grid-cols-3 lg:grid-cols-4 gap-2 font-mono text-sm">
+    <% codes.forEach(function(c) { %>
+      <div class="bg-dough/30 rounded-lg px-3 py-2 text-center text-cocoa"><%= c.code %></div>
+    <% }); %>
+  </div>
+</div>

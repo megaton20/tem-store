@@ -1,0 +1,26 @@
+<h1 class="text-2xl font-bold text-cocoa mb-1">My Sales</h1>
+<p class="text-sm text-cocoa-light mb-6">Today's total: <span class="font-semibold text-cocoa">&#8358;<%= Number(todayTotal).toLocaleString() %></span></p>
+
+<a href="/admin/pos" class="btn-primary inline-flex mb-6">Start a New Sale</a>
+
+<div class="card overflow-x-auto">
+  <table class="w-full text-sm">
+    <thead class="bg-dough/40 text-cocoa-light text-left">
+      <tr><th class="px-4 py-3">Order</th><th class="px-4 py-3">Items</th><th class="px-4 py-3">Total</th><th class="px-4 py-3">Time</th><th class="px-4 py-3"></th></tr>
+    </thead>
+    <tbody>
+      <% sales.forEach(function(sale) { %>
+        <tr class="border-t border-dough/60">
+          <td class="px-4 py-3 font-medium text-cocoa"><%= sale.orderNumber %></td>
+          <td class="px-4 py-3 text-cocoa-light"><%= sale.OrderItems.length %> item<%= sale.OrderItems.length === 1 ? '' : 's' %></td>
+          <td class="px-4 py-3 font-semibold text-cocoa">&#8358;<%= Number(sale.total).toLocaleString() %></td>
+          <td class="px-4 py-3 text-cocoa-light"><%= new Date(sale.createdAt).toLocaleString() %></td>
+          <td class="px-4 py-3"><a href="/admin/pos/receipt/<%= sale.id %>" class="text-caramel font-semibold text-xs">Receipt</a></td>
+        </tr>
+      <% }); %>
+      <% if (!sales.length) { %>
+        <tr><td colspan="5" class="px-4 py-8 text-center text-cocoa-light">No sales yet today.</td></tr>
+      <% } %>
+    </tbody>
+  </table>
+</div>

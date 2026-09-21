@@ -1,0 +1,127 @@
+<section class="max-w-lg mx-auto px-5 sm:px-8 py-12">
+  <h1 class="text-3xl font-bold text-cocoa mb-8">My Profile</h1>
+
+  <% if (errors && errors.length) { %>
+    <div class="bg-caramel-dark/10 border border-caramel-dark/30 text-caramel-dark rounded-xl px-4 py-3 mb-6 text-sm">
+      <ul class="list-disc list-inside"><% errors.forEach(function(e) { %><li><%= e %></li><% }); %></ul>
+    </div>
+  <% } %>
+  <% if (success) { %>
+    <div class="bg-forest/10 border border-forest/30 text-forest rounded-xl px-4 py-3 mb-6 text-sm"><%= success %></div>
+  <% } %>
+  <% if (typeof verified !== 'undefined' && verified) { %>
+    <div class="bg-forest/10 border border-forest/30 text-forest rounded-xl px-4 py-3 mb-6 text-sm">Your email is now verified.</div>
+  <% } %>
+  <% if (typeof resent !== 'undefined' && resent) { %>
+    <div class="bg-forest/10 border border-forest/30 text-forest rounded-xl px-4 py-3 mb-6 text-sm">Verification email resent — check your inbox.</div>
+  <% } %>
+
+  <% if (!currentUser.isVerified) { %>
+    <div class="bg-caramel/10 border border-caramel/30 rounded-xl px-4 py-3 mb-6 flex items-center justify-between gap-4 text-sm">
+      <span class="text-cocoa">Your email isn't verified yet.</span>
+      <form action="/resend-verification" method="POST">
+        <button type="submit" class="text-caramel-dark font-semibold whitespace-nowrap">Resend Email</button>
+      </form>
+    </div>
+  <% } %>
+
+  <div class="card p-6 mb-6">
+    <div class="flex items-center justify-between mb-4">
+      <h2 class="font-bold text-cocoa">TEM Rewards</h2>
+      <a href="/loyalty" class="text-xs text-caramel font-semibold">How it works</a>
+    </div>
+
+    <p class="text-sm text-cocoa-light mb-4">Completed purchases: <span class="font-semibold text-cocoa"><%= loyalty.purchaseCount %></span></p>
+
+    <div class="space-y-3 mb-5">
+      <% loyalty.tiers.forEach(function(tier) { %>
+        <% const reached = loyalty.purchaseCount >= tier.purchasesRequired; %>
+        <div class="flex items-center justify-between border border-dough rounded-xl p-3 <%= reached ? 'bg-forest/5 border-forest/20' : '' %>">
+          <div>
+            <p class="text-sm font-medium <%= reached ? 'text-forest' : 'text-cocoa' %>">Stage <%= tier.stageNumber %>: <%= tier.rewardLabel %></p>
+            <p class="text-xs text-cocoa-light">After <%= tier.purchasesRequired %> completed purchase<%= tier.purchasesRequired === 1 ? '' : 's' %></p>
+          </div>
+          <% if (reached) { %><span class="text-forest text-lg">&check;</span><% } %>
+        </div>
+      <% }); %>
+    </div>
+
+    <% if (loyalty.nextTier) { %>
+      <div class="bg-dough/40 rounded-xl p-3 mb-5">
+        <div class="flex justify-between text-xs text-cocoa-light mb-1">
+          <span><%= loyalty.purchaseCount %> / <%= loyalty.nextTier.purchasesRequired %> toward Stage <%= loyalty.nextTier.stageNumber %></span>
+        </div>
+        <div class="w-full bg-dough rounded-full h-2 overflow-hidden">
+          <div class="bg-caramel h-full" style="width: <%= Math.min(100, (loyalty.purchaseCount / loyalty.nextTier.purchasesRequired) * 100) %>%"></div>
+        </div>
+      </div>
+    <% } %>
+
+    <% const unredeemed = loyalty.rewards.filter(r => r.status === 'earned'); %>
+    <% if (unredeemed.length) { %>
+      <h3 class="text-sm font-semibold text-cocoa mb-2">Ready to Redeem</h3>
+      <div class="space-y-2">
+        <% unredeemed.forEach(function(r) { %>
+          <div class="bg-caramel/10 border border-caramel/30 rounded-xl p-3">
+            <p class="text-sm text-cocoa"><%= r.LoyaltyTier.rewardLabel %></p>
+            <p class="text-xs text-cocoa-light mt-1">Show this code at a kiosk to redeem:</p>
+            <p class="text-lg font-bold text-caramel-dark tracking-widest"><%= r.redemptionCode %></p>
+          </div>
+        <% }); %>
+      </div>
+    <% } %>
+  </div>
+
+  <div class="card p-6 mb-6">
+    <h2 class="font-bold text-cocoa mb-4">Account Details</h2>
+    <form action="/profile" method="POST" class="space-y-4">
+      <div>
+        <label class="block text-sm font-medium text-cocoa mb-2">Full Name</label>
+        <input type="text" name="fullName" value="<%= currentUser.fullName %>" required class="input-field">
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-cocoa mb-2">Email</label>
+        <input type="email" value="<%= currentUser.email %>" disabled class="input-field opacity-60">
+        <p class="text-xs text-cocoa-light mt-1">Email can't be changed here — contact us if you need it updated.</p>
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-cocoa mb-2">Phone</label>
+        <input type="text" name="phone" value="<%= currentUser.phone %>" required class="input-field">
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-cocoa mb-2">Address</label>
+        <input type="text" name="address" value="<%= currentUser.address || '' %>" class="input-field">
+      </div>
+      <div class="grid grid-cols-2 gap-4">
+        <div>
+          <label class="block text-sm font-medium text-cocoa mb-2">City</label>
+          <input type="text" name="city" value="<%= currentUser.city || '' %>" class="input-field">
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-cocoa mb-2">State</label>
+          <input type="text" name="state" value="<%= currentUser.state || '' %>" class="input-field">
+        </div>
+      </div>
+      <button type="submit" class="btn-primary w-full">Save Changes</button>
+    </form>
+  </div>
+
+  <div class="card p-6">
+    <h2 class="font-bold text-cocoa mb-4">Change Password</h2>
+    <form action="/profile/password" method="POST" class="space-y-4">
+      <div>
+        <label class="block text-sm font-medium text-cocoa mb-2">Current Password</label>
+        <input type="password" name="currentPassword" required class="input-field">
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-cocoa mb-2">New Password</label>
+        <input type="password" name="newPassword" required class="input-field">
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-cocoa mb-2">Confirm New Password</label>
+        <input type="password" name="confirmPassword" required class="input-field">
+      </div>
+      <button type="submit" class="btn-secondary w-full">Change Password</button>
+    </form>
+  </div>
+</section>

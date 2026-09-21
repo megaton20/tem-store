@@ -1,0 +1,61 @@
+<h1 class="text-2xl font-bold text-cocoa mb-1">Delivery Zones & Pricing</h1>
+<p class="text-sm text-cocoa-light mb-6">Cities we deliver product orders to, and what we charge for each. This is exactly what customers see at checkout, and on the public <a href="/where-we-ship" class="text-caramel font-semibold" target="_blank">Where We Ship</a> page.</p>
+
+<% if (errors && errors.length) { %>
+  <div class="bg-caramel-dark/10 border border-caramel-dark/30 text-caramel-dark rounded-xl px-4 py-3 mb-6 text-sm">
+    <ul class="list-disc list-inside"><% errors.forEach(function(e) { %><li><%= e %></li><% }); %></ul>
+  </div>
+<% } %>
+
+<div class="card p-6 mb-8">
+  <h2 class="font-bold text-cocoa mb-4">Add a City</h2>
+  <p class="text-sm text-cocoa-light mb-4">Start with the cities/LGAs you actually deliver to right now - add more any time, and each state can have as many cities as you need, each with its own price.</p>
+  <form action="/admin/delivery-zones" method="POST" class="grid sm:grid-cols-2 gap-4">
+    <div><label class="block text-sm font-medium text-cocoa mb-2">State</label><input type="text" name="state" required class="input-field" placeholder="e.g. Cross River"></div>
+    <div><label class="block text-sm font-medium text-cocoa mb-2">City / LGA</label><input type="text" name="city" required class="input-field" placeholder="e.g. Calabar Municipal"></div>
+    <div><label class="block text-sm font-medium text-cocoa mb-2">Delivery Fee</label><input type="number" name="fee" required class="input-field"></div>
+    <div><label class="block text-sm font-medium text-cocoa mb-2">Estimated Delivery Time</label><input type="text" name="estimatedDays" value="Same day - 1 day" class="input-field"></div>
+    <button type="submit" class="btn-primary sm:col-span-2">Add City</button>
+  </form>
+</div>
+
+<% const byState = {}; zones.forEach(function(z) { if (!byState[z.state]) byState[z.state] = []; byState[z.state].push(z); }); %>
+
+<% Object.keys(byState).forEach(function(state) { %>
+  <div class="mb-8">
+    <h2 class="text-sm font-semibold uppercase tracking-wide text-cocoa-light mb-3"><%= state %></h2>
+    <div class="card overflow-x-auto">
+      <table class="w-full text-sm">
+        <thead class="bg-dough/40 text-cocoa-light text-left">
+          <tr><th class="px-4 py-3">City</th><th class="px-4 py-3">Fee</th><th class="px-4 py-3">Est. Delivery</th><th class="px-4 py-3">Status</th><th class="px-4 py-3"></th></tr>
+        </thead>
+        <tbody>
+          <% byState[state].forEach(function(z) { %>
+            <tr class="border-t border-dough/60">
+              <td class="px-4 py-3 font-medium text-cocoa"><%= z.city %></td>
+              <td class="px-4 py-3">
+                <form action="/admin/delivery-zones/<%= z.id %>" method="POST" class="flex items-center gap-2">
+                  <input type="number" name="fee" value="<%= z.fee %>" class="input-field !py-1.5 !w-28 text-sm">
+                  <input type="text" name="estimatedDays" value="<%= z.estimatedDays %>" class="input-field !py-1.5 !w-36 text-sm">
+                  <button type="submit" class="btn-secondary !py-1.5 !px-3 text-xs">Save</button>
+                </form>
+              </td>
+              <td class="px-4 py-3 text-cocoa-light"><%= z.estimatedDays %></td>
+              <td class="px-4 py-3">
+                <span class="text-xs font-semibold px-2 py-1 rounded-full <%= z.isActive ? 'bg-forest/10 text-forest' : 'bg-caramel-dark/10 text-caramel-dark' %>"><%= z.isActive ? 'Active' : 'Inactive' %></span>
+              </td>
+              <td class="px-4 py-3">
+                <form action="/admin/delivery-zones/<%= z.id %>/toggle" method="POST">
+                  <button type="submit" class="btn-secondary !py-1 !px-3 text-xs"><%= z.isActive ? 'Deactivate' : 'Activate' %></button>
+                </form>
+              </td>
+            </tr>
+          <% }); %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+<% }); %>
+<% if (!Object.keys(byState).length) { %>
+  <div class="card p-10 text-center text-cocoa-light">No delivery zones yet - add your first city above.</div>
+<% } %>

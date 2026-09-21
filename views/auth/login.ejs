@@ -1,0 +1,25 @@
+<section class="max-w-md mx-auto px-5 sm:px-8 py-16">
+  <h1 class="text-3xl font-bold text-cocoa mb-2">Welcome back</h1>
+  <p class="text-cocoa-light mb-8">Log in to pick up where you left off.</p>
+
+  <% if (error) { %>
+    <div class="bg-caramel-dark/10 border border-caramel-dark/30 text-caramel-dark rounded-xl px-4 py-3 mb-6 text-sm"><%= error %></div>
+  <% } %>
+
+  <form action="/login" method="POST" class="space-y-4">
+    <input type="hidden" name="next" value="<%= next %>">
+    <div>
+      <label class="block text-sm font-medium text-cocoa mb-2">Email</label>
+      <input type="email" name="email" required class="input-field" placeholder="you@example.com">
+    </div>
+    <div>
+      <label class="block text-sm font-medium text-cocoa mb-2">Password</label>
+      <input type="password" name="password" required class="input-field" placeholder="••••••••">
+    </div>
+    <button type="submit" class="btn-primary w-full">Log In</button>
+  </form>
+
+  <p class="text-sm text-cocoa-light mt-6 text-center">
+    New to TEM Store? <a href="/register?next=<%= encodeURIComponent(next) %>" class="text-caramel font-semibold hover:text-caramel-dark">Create an account</a>
+  </p>
+</section>

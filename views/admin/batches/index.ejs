@@ -1,0 +1,26 @@
+<div class="flex items-center justify-between mb-6">
+  <h1 class="text-2xl font-bold text-cocoa">Production Batches</h1>
+  <a href="/admin/batches/new" class="btn-primary !py-2 text-sm">+ New Batch</a>
+</div>
+
+<div class="card overflow-x-auto">
+  <table class="w-full text-sm">
+    <thead class="bg-dough/40 text-cocoa-light text-left">
+      <tr><th class="px-4 py-3">Batch</th><th class="px-4 py-3">Product</th><th class="px-4 py-3">Quantity</th><th class="px-4 py-3">Produced</th><th class="px-4 py-3"></th></tr>
+    </thead>
+    <tbody>
+      <% batches.forEach(function(b) { %>
+        <tr class="border-t border-dough/60">
+          <td class="px-4 py-3 font-mono font-semibold text-cocoa"><%= b.batchNumber %></td>
+          <td class="px-4 py-3 text-cocoa-light"><%= b.Product ? b.Product.name : '—' %></td>
+          <td class="px-4 py-3 text-cocoa-light"><%= b.quantityProduced %></td>
+          <td class="px-4 py-3 text-cocoa-light"><%= new Date(b.producedAt).toLocaleDateString() %></td>
+          <td class="px-4 py-3"><a href="/admin/batches/<%= b.id %>/codes" class="text-caramel font-semibold text-xs">View Codes</a></td>
+        </tr>
+      <% }); %>
+      <% if (!batches.length) { %>
+        <tr><td colspan="5" class="px-4 py-8 text-center text-cocoa-light">No batches recorded yet.</td></tr>
+      <% } %>
+    </tbody>
+  </table>
+</div>

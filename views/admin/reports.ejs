@@ -1,0 +1,78 @@
+<div class="flex items-center justify-between mb-6">
+  <h1 class="text-2xl font-bold text-cocoa">Reports</h1>
+  <div class="flex items-center gap-2">
+    <form method="GET" class="flex gap-2">
+      <select name="days" onchange="this.form.submit()" class="input-field !py-2 !w-40">
+        <option value="7" <%= days === 7 ? 'selected' : '' %>>Last 7 days</option>
+        <option value="30" <%= days === 30 ? 'selected' : '' %>>Last 30 days</option>
+        <option value="90" <%= days === 90 ? 'selected' : '' %>>Last 90 days</option>
+      </select>
+    </form>
+    <a href="/admin/reports/export?days=<%= days %>" class="btn-secondary !py-2 text-sm">Export CSV</a>
+  </div>
+</div>
+
+<div class="grid sm:grid-cols-2 gap-5 mb-8">
+  <div class="card p-6">
+    <p class="text-sm text-cocoa-light">Total Revenue (<%= days %> days)</p>
+    <p class="text-3xl font-bold text-cocoa mt-2">&#8358;<%= Number(totalRevenue).toLocaleString() %></p>
+  </div>
+  <div class="card p-6">
+    <p class="text-sm text-cocoa-light">Paid Orders</p>
+    <p class="text-3xl font-bold text-cocoa mt-2"><%= totalOrders %></p>
+  </div>
+</div>
+
+<div class="card p-6 mb-8">
+  <h2 class="font-bold text-cocoa mb-4">Revenue by Day</h2>
+  <% if (!dailyRevenue.length) { %>
+    <p class="text-sm text-cocoa-light">No paid orders in this period yet.</p>
+  <% } else { %>
+    <div class="space-y-2">
+      <% const maxRevenue = Math.max(...dailyRevenue.map(d => Number(d.revenue))); %>
+      <% dailyRevenue.forEach(function(d) { %>
+        <div class="flex items-center gap-3 text-sm">
+          <span class="w-24 text-cocoa-light flex-shrink-0"><%= new Date(d.day).toLocaleDateString() %></span>
+          <div class="flex-1 bg-dough/40 rounded-full h-5 overflow-hidden">
+            <div class="bg-forest h-full rounded-full" style="width: <%= maxRevenue ? (Number(d.revenue) / maxRevenue * 100) : 0 %>%"></div>
+          </div>
+          <span class="w-28 text-right font-medium text-cocoa">&#8358;<%= Number(d.revenue).toLocaleString() %></span>
+        </div>
+      <% }); %>
+    </div>
+  <% } %>
+</div>
+
+<div class="grid sm:grid-cols-2 gap-6">
+  <div class="card p-6">
+    <h2 class="font-bold text-cocoa mb-4">Top Products</h2>
+    <% if (!topProducts.length) { %>
+      <p class="text-sm text-cocoa-light">No sales yet in this period.</p>
+    <% } else { %>
+      <div class="space-y-2">
+        <% topProducts.forEach(function(p) { %>
+          <div class="flex justify-between text-sm border-b border-dough/60 pb-2">
+            <span class="text-cocoa"><%= p.productName %></span>
+            <span class="text-cocoa-light"><%= p.totalQuantity %> sold &middot; &#8358;<%= Number(p.totalRevenue).toLocaleString() %></span>
+          </div>
+        <% }); %>
+      </div>
+    <% } %>
+  </div>
+
+  <div class="card p-6">
+    <h2 class="font-bold text-cocoa mb-4">Revenue by Branch</h2>
+    <% if (!branchRevenue.length) { %>
+      <p class="text-sm text-cocoa-light">No branch-attributed orders yet.</p>
+    <% } else { %>
+      <div class="space-y-2">
+        <% branchRevenue.forEach(function(b) { %>
+          <div class="flex justify-between text-sm border-b border-dough/60 pb-2">
+            <span class="text-cocoa"><%= b['Branch.name'] || 'Unknown' %></span>
+            <span class="text-cocoa-light"><%= b.orderCount %> orders &middot; &#8358;<%= Number(b.revenue).toLocaleString() %></span>
+          </div>
+        <% }); %>
+      </div>
+    <% } %>
+  </div>
+</div>

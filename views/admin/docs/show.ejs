@@ -1,0 +1,18 @@
+<a href="/admin/docs" class="text-sm text-cocoa-light hover:text-cocoa">&larr; All Role Guides</a>
+
+<div class="mt-4 mb-8">
+  <div class="flex items-center gap-3">
+    <h1 class="text-2xl font-bold text-cocoa"><%= dept.label %></h1>
+    <% if (role === ownRole) { %><span class="text-xs font-semibold uppercase text-caramel-dark bg-caramel/10 px-2 py-1 rounded-full">Your Role</span><% } %>
+  </div>
+  <p class="text-cocoa-light mt-1"><%= dept.tagline %></p>
+</div>
+
+<div class="space-y-6 max-w-2xl">
+  <% dept.sections.forEach(function(section) { %>
+    <div class="card p-6">
+      <h2 class="font-bold text-cocoa mb-2"><%= section.heading %></h2>
+      <p class="text-sm text-cocoa-light leading-relaxed"><%= section.body %></p>
+    </div>
+  <% }); %>
+</div>

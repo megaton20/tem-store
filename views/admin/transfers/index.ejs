@@ -1,0 +1,132 @@
+<h1 class="text-2xl font-bold text-cocoa mb-6">Stock Transfers</h1>
+
+<div class="card p-6 mb-8">
+  <h2 class="font-bold text-cocoa mb-4"><%= ownBranchId ? 'Send Stock to Another Branch' : 'New Transfer' %></h2>
+  <p class="text-sm text-cocoa-light mb-4">Stock only moves once the receiving branch confirms it arrived - nothing is deducted the moment you send it.</p>
+  <form action="/admin/transfers" method="POST" class="grid sm:grid-cols-2 gap-4">
+    <div>
+      <label class="block text-sm font-medium text-cocoa mb-2">Product</label>
+      <select name="productId" required class="input-field">
+        <% products.forEach(function(p) { %><option value="<%= p.id %>"><%= p.name %></option><% }); %>
+      </select>
+    </div>
+    <div>
+      <label class="block text-sm font-medium text-cocoa mb-2">Quantity</label>
+      <input type="number" name="quantity" min="1" required class="input-field">
+    </div>
+
+    <% if (!ownBranchId) { %>
+      <div>
+        <label class="block text-sm font-medium text-cocoa mb-2">From (leave blank for new production intake)</label>
+        <select name="fromBranchId" class="input-field">
+          <option value="">— New Stock Intake —</option>
+          <% branches.forEach(function(b) { %><option value="<%= b.id %>"><%= b.name %></option><% }); %>
+        </select>
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-cocoa mb-2">To</label>
+        <select name="toBranchId" required class="input-field">
+          <% branches.forEach(function(b) { %><option value="<%= b.id %>"><%= b.name %></option><% }); %>
+        </select>
+      </div>
+    <% } else { %>
+      <input type="hidden" name="fromBranchId" value="<%= ownBranchId %>">
+      <div class="sm:col-span-2">
+        <label class="block text-sm font-medium text-cocoa mb-2">Send To</label>
+        <select name="toBranchId" required class="input-field">
+          <% branches.filter(b => b.id !== ownBranchId).forEach(function(b) { %><option value="<%= b.id %>"><%= b.name %></option><% }); %>
+        </select>
+      </div>
+      <p class="sm:col-span-2 text-xs text-cocoa-light -mt-2">Receiving fresh stock instead of sending to another branch? Ask whoever manages your production intake, or use "New Stock Intake" (super admin only) to land it directly here.</p>
+    <% } %>
+
+    <div class="sm:col-span-2">
+      <label class="block text-sm font-medium text-cocoa mb-2">Notes</label>
+      <input type="text" name="notes" class="input-field" placeholder="Optional">
+    </div>
+    <button type="submit" class="btn-primary sm:col-span-2">Send Transfer</button>
+  </form>
+</div>
+
+<% if (pendingIncoming.length) { %>
+  <div class="card p-6 mb-8 border-2 border-caramel/40">
+    <h2 class="font-bold text-cocoa mb-1">Pending Incoming — Needs Your Confirmation</h2>
+    <p class="text-sm text-cocoa-light mb-4">Only confirm once the stock has physically arrived at <%= ownBranchId ? 'your branch' : 'the destination branch' %>.</p>
+    <div class="space-y-3">
+      <% pendingIncoming.forEach(function(tr) { %>
+        <div class="border border-caramel/30 bg-caramel/5 rounded-xl p-4 flex items-center justify-between gap-4">
+          <div>
+            <p class="font-semibold text-cocoa"><%= tr.Product ? tr.Product.name : '—' %> &times; <%= tr.quantity %></p>
+            <p class="text-xs text-cocoa-light mt-1">
+              From <%= tr.fromBranch ? tr.fromBranch.name : 'New Intake' %> &rarr; <%= tr.toBranch ? tr.toBranch.name : '—' %>
+              &middot; sent by <%= tr.initiatedBy ? tr.initiatedBy.fullName : '—' %> on <%= new Date(tr.createdAt).toLocaleDateString() %>
+            </p>
+            <% if (tr.notes) { %><p class="text-xs text-cocoa-light mt-1">"<%= tr.notes %>"</p><% } %>
+          </div>
+          <div class="flex items-center gap-2 flex-shrink-0">
+            <form action="/admin/transfers/<%= tr.id %>/receive" method="POST">
+              <button type="submit" class="btn-primary !py-2 !px-4 text-sm">Confirm Received</button>
+            </form>
+            <form action="/admin/transfers/<%= tr.id %>/cancel" method="POST">
+              <button type="submit" class="btn-secondary !py-2 !px-3 text-xs">Reject</button>
+            </form>
+          </div>
+        </div>
+      <% }); %>
+    </div>
+  </div>
+<% } %>
+
+<% if (pendingOutgoing.length) { %>
+  <div class="card p-6 mb-8">
+    <h2 class="font-bold text-cocoa mb-4">Pending Outgoing — Awaiting the Other Branch</h2>
+    <div class="space-y-3">
+      <% pendingOutgoing.forEach(function(tr) { %>
+        <div class="border border-dough rounded-xl p-4 flex items-center justify-between gap-4">
+          <div>
+            <p class="font-semibold text-cocoa"><%= tr.Product ? tr.Product.name : '—' %> &times; <%= tr.quantity %></p>
+            <p class="text-xs text-cocoa-light mt-1">
+              To <%= tr.toBranch ? tr.toBranch.name : '—' %> &middot; sent <%= new Date(tr.createdAt).toLocaleDateString() %> &middot; still showing in your stock until they confirm
+            </p>
+          </div>
+          <form action="/admin/transfers/<%= tr.id %>/cancel" method="POST">
+            <button type="submit" class="btn-secondary !py-2 !px-3 text-xs">Cancel</button>
+          </form>
+        </div>
+      <% }); %>
+    </div>
+  </div>
+<% } %>
+
+<div class="card overflow-x-auto">
+  <h2 class="font-bold text-cocoa p-6 pb-0">Recent History</h2>
+  <table class="w-full text-sm mt-4">
+    <thead class="bg-dough/40 text-cocoa-light text-left">
+      <tr>
+        <th class="px-4 py-3">Date</th>
+        <th class="px-4 py-3">Product</th>
+        <th class="px-4 py-3">From</th>
+        <th class="px-4 py-3">To</th>
+        <th class="px-4 py-3">Qty</th>
+        <th class="px-4 py-3">Status</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% history.forEach(function(tr) { %>
+        <tr class="border-t border-dough/60">
+          <td class="px-4 py-3 text-cocoa-light"><%= new Date(tr.createdAt).toLocaleDateString() %></td>
+          <td class="px-4 py-3 font-medium text-cocoa"><%= tr.Product ? tr.Product.name : '—' %></td>
+          <td class="px-4 py-3 text-cocoa-light"><%= tr.fromBranch ? tr.fromBranch.name : 'New Intake' %></td>
+          <td class="px-4 py-3 text-cocoa-light"><%= tr.toBranch ? tr.toBranch.name : '—' %></td>
+          <td class="px-4 py-3 font-semibold text-cocoa">+<%= tr.quantity %></td>
+          <td class="px-4 py-3">
+            <span class="text-xs font-semibold px-2 py-1 rounded-full <%= tr.status === 'completed' ? 'bg-forest/10 text-forest' : 'bg-caramel-dark/10 text-caramel-dark' %>"><%= tr.status %></span>
+          </td>
+        </tr>
+      <% }); %>
+      <% if (!history.length) { %>
+        <tr><td colspan="6" class="px-4 py-8 text-center text-cocoa-light">No completed transfers yet.</td></tr>
+      <% } %>
+    </tbody>
+  </table>
+</div>

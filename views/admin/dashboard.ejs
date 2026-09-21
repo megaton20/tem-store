@@ -1,0 +1,48 @@
+<h1 class="text-2xl font-bold text-cocoa mb-6">Dashboard</h1>
+
+<div class="grid sm:grid-cols-4 gap-5 mb-8">
+  <a href="/admin/orders" class="card p-6 hover:shadow-md transition-shadow">
+    <p class="text-sm text-cocoa-light">Orders needing attention</p>
+    <p class="text-3xl font-bold text-cocoa mt-2"><%= pendingOrders %></p>
+  </a>
+  <a href="/admin/inventory" class="card p-6 hover:shadow-md transition-shadow">
+    <p class="text-sm text-cocoa-light">Low stock items</p>
+    <p class="text-3xl font-bold <%= lowStockItems.length ? 'text-caramel-dark' : 'text-cocoa' %> mt-2"><%= lowStockItems.length %></p>
+  </a>
+  <a href="/admin/transfers" class="card p-6 hover:shadow-md transition-shadow">
+    <p class="text-sm text-cocoa-light">Pending transfers</p>
+    <p class="text-3xl font-bold <%= pendingTransfers ? 'text-caramel-dark' : 'text-cocoa' %> mt-2"><%= pendingTransfers %></p>
+  </a>
+  <a href="/admin/pos" class="card p-6 hover:shadow-md transition-shadow">
+    <p class="text-sm text-cocoa-light">POS sales today</p>
+    <p class="text-3xl font-bold text-cocoa mt-2"><%= todaysPosSales %></p>
+  </a>
+</div>
+
+<% if (lowStockItems.length) { %>
+  <div class="card p-6 mb-8">
+    <h2 class="font-bold text-cocoa mb-4">Low Stock</h2>
+    <div class="space-y-2">
+      <% lowStockItems.forEach(function(item) { %>
+        <div class="flex items-center justify-between text-sm border-b border-dough/60 pb-2">
+          <span class="text-cocoa"><%= item.Product ? item.Product.name : 'Unknown product' %> <span class="text-cocoa-light">@ <%= item.Branch ? item.Branch.name : '—' %></span></span>
+          <span class="font-semibold text-caramel-dark"><%= item.quantity %> left</span>
+        </div>
+      <% }); %>
+    </div>
+  </div>
+<% } %>
+
+<% if (branches.length) { %>
+  <div class="card p-6">
+    <h2 class="font-bold text-cocoa mb-4">Active Branches</h2>
+    <div class="grid sm:grid-cols-2 gap-3">
+      <% branches.forEach(function(b) { %>
+        <div class="border border-dough rounded-xl p-4">
+          <p class="font-semibold text-cocoa"><%= b.name %></p>
+          <p class="text-xs text-cocoa-light mt-1"><%= b.city %>, <%= b.state %> &middot; <%= b.type %></p>
+        </div>
+      <% }); %>
+    </div>
+  </div>
+<% } %>

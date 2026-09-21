@@ -1,0 +1,173 @@
+<section class="max-w-5xl mx-auto px-5 sm:px-8 py-12">
+  <h1 class="text-3xl font-bold text-cocoa mb-8">Checkout</h1>
+
+  <% if (error) { %>
+    <div class="bg-caramel-dark/10 border border-caramel-dark/30 text-caramel-dark rounded-xl px-4 py-3 mb-6 text-sm">
+      <%= error %>
+    </div>
+  <% } %>
+
+  <div class="grid lg:grid-cols-3 gap-10">
+    <form action="/checkout" method="POST" class="lg:col-span-2 space-y-8" id="checkout-form">
+
+      <div class="card p-6">
+        <h2 class="font-bold text-lg text-cocoa mb-4">How should we get this to you?</h2>
+
+        <div class="space-y-3">
+          <label class="flex items-start gap-3 border border-dough rounded-xl p-4 cursor-pointer has-[:checked]:border-caramel has-[:checked]:bg-caramel/5">
+            <input type="radio" name="deliveryMethod" value="pickup" class="mt-1" onchange="toggleDelivery('pickup')" checked>
+            <div>
+              <p class="font-semibold text-cocoa">Pickup at a Kiosk</p>
+              <p class="text-sm text-cocoa-light">Free. Grab it yourself from a TEM Store kiosk in Calabar.</p>
+            </div>
+          </label>
+          <label class="flex items-start gap-3 border border-dough rounded-xl p-4 cursor-pointer has-[:checked]:border-caramel has-[:checked]:bg-caramel/5">
+            <input type="radio" name="deliveryMethod" value="home" class="mt-1" onchange="toggleDelivery('home')">
+            <div>
+              <p class="font-semibold text-cocoa">Home Delivery</p>
+              <p class="text-sm text-cocoa-light">Delivered to your address. Fee depends on your city.</p>
+            </div>
+          </label>
+        </div>
+
+        <!-- Pickup fields -->
+        <div id="pickup-fields" class="mt-5">
+          <label class="block text-sm font-medium text-cocoa mb-2">Choose a pickup kiosk</label>
+          <select name="branchId" class="input-field">
+            <% branches.forEach(function(loc) { %>
+              <option value="<%= loc.id %>"><%= loc.name %> — <%= loc.address %> (<%= loc.operatingHours %>)</option>
+            <% }); %>
+          </select>
+          <% if (!branches.length) { %>
+            <p class="text-sm text-caramel-dark mt-2">No pickup kiosks available yet — please choose home delivery.</p>
+          <% } %>
+        </div>
+
+        <!-- Home delivery fields -->
+        <div id="home-fields" class="mt-5 hidden space-y-4">
+          <div>
+            <label class="block text-sm font-medium text-cocoa mb-2">Delivery Address</label>
+            <input type="text" name="deliveryAddress" class="input-field" placeholder="Street address">
+          </div>
+          <div class="grid sm:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-sm font-medium text-cocoa mb-2">State</label>
+              <select id="state-select" class="input-field" onchange="populateCities()">
+                <option value="">Select a state</option>
+                <% Object.keys(zonesByState).forEach(function(state) { %>
+                  <option value="<%= state %>"><%= state %></option>
+                <% }); %>
+              </select>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-cocoa mb-2">City</label>
+              <select name="deliveryCity" id="city-select" required class="input-field" onchange="updateStateFromCity(); updateFeePreview();">
+                <option value="">Select a state first</option>
+              </select>
+              <input type="hidden" name="deliveryState" id="state-hidden">
+            </div>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-cocoa mb-2">Phone Number for Delivery</label>
+            <input type="text" name="deliveryPhone" class="input-field" placeholder="e.g. 080XXXXXXXX" value="<%= user.phone %>">
+          </div>
+          <% if (!deliveryZones.length) { %>
+            <p class="text-sm text-caramel-dark">We don't have delivery zones set up yet — please choose pickup.</p>
+          <% } %>
+          <div id="fee-preview-box" class="hidden bg-forest/5 border border-forest/20 rounded-xl p-4 flex items-center justify-between">
+            <span class="text-sm text-cocoa">Delivery Fee <span id="fee-preview-days" class="text-cocoa-light"></span></span>
+            <span id="fee-preview-amount" class="text-lg font-bold text-forest">&#8358;0</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="card p-6">
+        <h2 class="font-bold text-lg text-cocoa mb-4">Discount Code</h2>
+        <input type="text" name="discountCode" class="input-field uppercase" placeholder="Optional — enter a code">
+      </div>
+
+      <button type="submit" class="btn-primary w-full sm:w-auto">Pay with Paystack</button>
+    </form>
+
+    <div class="card p-6 h-fit">
+      <h2 class="font-bold text-lg text-cocoa mb-4">Order Summary</h2>
+      <div class="space-y-3">
+        <% items.forEach(function(item) { %>
+          <div class="flex justify-between text-sm">
+            <span class="text-cocoa-light"><%= item.Product.name %> &times; <%= item.quantity %></span>
+            <span class="text-cocoa font-medium">&#8358;<%= (Number(item.unitPrice) * item.quantity).toLocaleString() %></span>
+          </div>
+        <% }); %>
+      </div>
+      <div class="border-t border-dough mt-4 pt-4 flex justify-between font-bold text-cocoa">
+        <span>Subtotal</span>
+        <span>&#8358;<%= Number(subtotal).toLocaleString() %></span>
+      </div>
+      <p class="text-xs text-cocoa-light mt-2">Delivery fee and any discount are applied after you submit.</p>
+    </div>
+  </div>
+</section>
+
+<script>
+  function toggleDelivery(method) {
+    document.getElementById('pickup-fields').classList.toggle('hidden', method !== 'pickup');
+    document.getElementById('home-fields').classList.toggle('hidden', method !== 'home');
+  }
+
+  // Every city we deliver to, grouped by state - embedded server-side so the
+  // city dropdown is always exactly what's in the database, never free text.
+  const ZONES_BY_STATE = <%- JSON.stringify(zonesByState) %>;
+
+  function populateCities() {
+    const state = document.getElementById('state-select').value;
+    const citySelect = document.getElementById('city-select');
+    citySelect.innerHTML = '';
+
+    if (!state || !ZONES_BY_STATE[state]) {
+      citySelect.innerHTML = '<option value="">Select a state first</option>';
+      document.getElementById('state-hidden').value = '';
+      updateFeePreview();
+      return;
+    }
+
+    document.getElementById('state-hidden').value = state;
+    citySelect.innerHTML = '<option value="">Select a city</option>';
+    ZONES_BY_STATE[state].forEach(function (zone) {
+      const opt = document.createElement('option');
+      opt.value = zone.city;
+      opt.dataset.fee = zone.fee;
+      opt.dataset.days = zone.estimatedDays;
+      opt.textContent = zone.city + ' — ₦' + Number(zone.fee).toLocaleString();
+      citySelect.appendChild(opt);
+    });
+    updateFeePreview();
+  }
+
+  // If a city is chosen without going through the state dropdown first
+  // (e.g. browser autofill), keep the hidden state field in sync.
+  function updateStateFromCity() {
+    const citySelect = document.getElementById('city-select');
+    const option = citySelect.options[citySelect.selectedIndex];
+    if (!option || !option.dataset.fee) return;
+    for (const state in ZONES_BY_STATE) {
+      if (ZONES_BY_STATE[state].some((z) => z.city === citySelect.value)) {
+        document.getElementById('state-hidden').value = state;
+        document.getElementById('state-select').value = state;
+        break;
+      }
+    }
+  }
+
+  function updateFeePreview() {
+    const citySelect = document.getElementById('city-select');
+    const option = citySelect.options[citySelect.selectedIndex];
+    const box = document.getElementById('fee-preview-box');
+    if (!option || !option.dataset.fee) {
+      box.classList.add('hidden');
+      return;
+    }
+    box.classList.remove('hidden');
+    document.getElementById('fee-preview-amount').textContent = '₦' + Number(option.dataset.fee).toLocaleString();
+    document.getElementById('fee-preview-days').textContent = '(' + option.dataset.days + ')';
+  }
+</script>

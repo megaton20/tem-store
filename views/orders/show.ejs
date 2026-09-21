@@ -1,0 +1,68 @@
+<section class="max-w-3xl mx-auto px-5 sm:px-8 py-12">
+  <% if (success) { %>
+    <div class="bg-forest/10 border border-forest/30 text-forest rounded-xl px-4 py-3 mb-6 text-sm font-medium">
+      Payment received — thank you! Your order is confirmed.
+    </div>
+  <% } %>
+  <% if (failed) { %>
+    <div class="bg-caramel-dark/10 border border-caramel-dark/30 text-caramel-dark rounded-xl px-4 py-3 mb-6 text-sm font-medium">
+      Payment was not successful. You can try again from your cart, or contact us for help.
+    </div>
+  <% } %>
+
+  <div class="flex items-center justify-between mb-8">
+    <div>
+      <h1 class="text-2xl font-bold text-cocoa"><%= order.orderNumber %></h1>
+      <p class="text-sm text-cocoa-light"><%= new Date(order.createdAt).toLocaleString() %></p>
+    </div>
+    <span class="text-xs font-semibold uppercase tracking-wide px-3 py-1.5 rounded-full <%= order.status === 'paid' || order.status === 'completed' ? 'bg-forest/10 text-forest' : 'bg-caramel/10 text-caramel-dark' %>">
+      <%= order.status.replace(/_/g, ' ') %>
+    </span>
+  </div>
+
+  <div class="card p-6 mb-6">
+    <h2 class="font-bold text-cocoa mb-4">Items</h2>
+    <div class="space-y-3">
+      <% order.OrderItems.forEach(function(item) { %>
+        <div class="flex justify-between text-sm">
+          <span class="text-cocoa-light"><%= item.productName %> &times; <%= item.quantity %></span>
+          <span class="text-cocoa font-medium">&#8358;<%= Number(item.lineTotal).toLocaleString() %></span>
+        </div>
+      <% }); %>
+    </div>
+    <div class="border-t border-dough mt-4 pt-4 space-y-1 text-sm">
+      <div class="flex justify-between"><span class="text-cocoa-light">Subtotal</span><span class="text-cocoa"><%= '\u20A6' %><%= Number(order.subtotal).toLocaleString() %></span></div>
+      <div class="flex justify-between"><span class="text-cocoa-light">Delivery</span><span class="text-cocoa"><%= '\u20A6' %><%= Number(order.deliveryFee).toLocaleString() %></span></div>
+      <div class="flex justify-between font-bold text-cocoa text-base mt-1"><span>Total</span><span><%= '\u20A6' %><%= Number(order.total).toLocaleString() %></span></div>
+    </div>
+  </div>
+
+  <div class="card p-6">
+    <h2 class="font-bold text-cocoa mb-3">Delivery Details</h2>
+    <% if (order.deliveryMethod === 'pickup') { %>
+      <p class="text-sm text-cocoa-light">Pickup at: <span class="text-cocoa font-medium"><%= order.Branch ? order.Branch.name : '—' %></span></p>
+      <% if (order.Branch) { %><p class="text-sm text-cocoa-light mt-1"><%= order.Branch.address %></p><% } %>
+    <% } else { %>
+      <p class="text-sm text-cocoa-light"><%= order.deliveryAddress %>, <%= order.deliveryCity %>, <%= order.deliveryState %></p>
+      <p class="text-sm text-cocoa-light mt-1">Phone: <%= order.deliveryPhone %></p>
+      <% if (order.rider) { %>
+        <p class="text-sm text-cocoa-light mt-1">Rider: <span class="text-cocoa font-medium"><%= order.rider.fullName %></span> &middot; <%= order.rider.phone %></p>
+      <% } %>
+    <% } %>
+
+    <% if (order.expectedReadyAt) { %>
+      <div class="mt-4 bg-forest/5 border border-forest/20 rounded-xl p-4">
+        <p class="text-sm text-cocoa">This order includes an item sourced from a third-party supplier. Expected ready by <span class="font-semibold"><%= new Date(order.expectedReadyAt).toLocaleDateString() %></span>.</p>
+      </div>
+    <% } %>
+
+    <% if (order.deliveryConfirmationCode && ['paid', 'processing', 'ready_for_pickup', 'out_for_delivery'].includes(order.status)) { %>
+      <div class="mt-4 bg-caramel/10 border border-caramel/30 rounded-xl p-4">
+        <p class="text-sm text-cocoa-light">
+          <% if (order.deliveryMethod === 'home') { %>Give this code to your rider when your order arrives, to confirm it's you:<% } else { %>Give this code at the counter when you pick up your order, to confirm it's you:<% } %>
+        </p>
+        <p class="text-2xl font-bold text-caramel-dark tracking-widest mt-1"><%= order.deliveryConfirmationCode %></p>
+      </div>
+    <% } %>
+  </div>
+</section>

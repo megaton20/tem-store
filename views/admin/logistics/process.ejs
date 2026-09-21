@@ -1,0 +1,74 @@
+<h1 class="text-2xl font-bold text-cocoa mb-1">Process & Dispatch</h1>
+<p class="text-sm text-cocoa-light mb-4">
+  <% if (canAssign) { %>Mark packed orders ready for shipment, then assign a rider from your branch.<% } else { %>Confirm packed orders are ready and handed off to logistics for dispatch.<% } %>
+</p>
+<% if (canBook) { %><a href="/admin/logistics/book" class="btn-primary inline-flex mb-8 !py-2 text-sm">+ Book Walk-in Delivery</a><% } %>
+
+<% if (noBranch) { %>
+  <div class="card p-10 text-center text-cocoa-light">Your account isn't assigned to a branch yet — ask a super admin to assign you one.</div>
+<% } else { %>
+
+  <div class="card p-6 mb-8">
+    <h2 class="font-bold text-cocoa mb-4">Orders Ready to Process</h2>
+    <% if (!unprocessedOrders.length) { %>
+      <p class="text-sm text-cocoa-light">Nothing waiting to be processed right now.</p>
+    <% } else { %>
+      <div class="space-y-3">
+        <% unprocessedOrders.forEach(function(order) { %>
+          <div class="border border-dough rounded-xl p-4 flex items-center justify-between gap-4">
+            <div>
+              <p class="font-semibold text-cocoa"><%= order.orderNumber %></p>
+              <p class="text-xs text-cocoa-light mt-1"><%= order.OrderItems.map(i => i.quantity + 'x ' + i.productName).join(', ') %></p>
+              <p class="text-xs text-cocoa-light mt-1"><%= order.deliveryAddress %>, <%= order.deliveryCity %></p>
+            </div>
+            <form action="/admin/logistics/orders/<%= order.id %>/mark-ready" method="POST">
+              <button type="submit" class="btn-primary !py-2 !px-4 text-sm whitespace-nowrap"><%= canAssign ? 'Mark Ready for Shipment' : 'Confirm Picked & Ready for Logistics' %></button>
+            </form>
+          </div>
+        <% }); %>
+      </div>
+    <% } %>
+  </div>
+
+  <div class="card p-6">
+    <h2 class="font-bold text-cocoa mb-4">Shipments From Your Branch</h2>
+    <% if (!shipments.length) { %>
+      <p class="text-sm text-cocoa-light">No active shipments from your branch right now.</p>
+    <% } else { %>
+      <div class="space-y-4">
+        <% shipments.forEach(function(s) { %>
+          <div class="border border-dough rounded-xl p-4">
+            <div class="flex items-start justify-between gap-4 mb-2">
+              <div>
+                <p class="font-semibold text-cocoa"><%= s.recipientName %></p>
+                <p class="text-xs text-cocoa-light"><%= s.deliveryAddress %>, <%= s.deliveryCity %></p>
+                <% if (s.source === 'external') { %>
+                  <p class="text-xs text-forest font-medium mt-1">Walk-in courier &middot; &#8358;<%= Number(s.fee).toLocaleString() %> &middot; <%= s.paymentStatus %></p>
+                <% } %>
+              </div>
+              <span class="text-xs font-semibold uppercase px-2 py-1 rounded-full whitespace-nowrap <%= s.status === 'awaiting_dispatch' ? 'bg-caramel/10 text-caramel-dark' : s.status === 'out_for_delivery' ? 'bg-forest/10 text-forest' : 'bg-dough text-cocoa-light' %>"><%= s.status.replace(/_/g, ' ') %></span>
+            </div>
+            <p class="text-xs text-cocoa-light bg-dough/30 rounded-lg p-2 mb-2"><%= s.manifest %></p>
+            <% if (canAssign && s.status !== 'out_for_delivery') { %>
+              <form action="/admin/logistics/shipments/<%= s.id %>/assign" method="POST" class="flex items-center gap-2">
+                <select name="riderId" required class="input-field !py-2 flex-1 text-sm">
+                  <option value="">Select a rider</option>
+                  <% riders.forEach(function(r) { %>
+                    <option value="<%= r.id %>" <%= s.assignedRiderId === r.id ? 'selected' : '' %>><%= r.fullName %></option>
+                  <% }); %>
+                </select>
+                <button type="submit" class="btn-secondary !py-2 !px-3 text-xs"><%= s.rider ? 'Reassign' : 'Assign' %></button>
+              </form>
+            <% } else if (s.status === 'out_for_delivery') { %>
+              <p class="text-xs text-cocoa-light">Out for delivery with <span class="font-medium text-cocoa"><%= s.rider ? s.rider.fullName : '—' %></span></p>
+            <% } else { %>
+              <p class="text-xs text-cocoa-light">
+                <%= s.rider ? 'Assigned to ' + s.rider.fullName + ' by logistics' : 'Waiting for logistics to assign a rider.' %>
+              </p>
+            <% } %>
+          </div>
+        <% }); %>
+      </div>
+    <% } %>
+  </div>
+<% } %>

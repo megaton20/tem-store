@@ -1,0 +1,43 @@
+<div class="flex items-center justify-between mb-6">
+  <h1 class="text-2xl font-bold text-cocoa">Orders</h1>
+  <form method="GET" class="flex gap-2">
+    <select name="status" onchange="this.form.submit()" class="input-field !py-2 !w-52">
+      <option value="">All Statuses</option>
+      <% ['pending_payment','paid','processing','ready_for_pickup','out_for_delivery','completed','cancelled'].forEach(function(s) { %>
+        <option value="<%= s %>" <%= statusFilter === s ? 'selected' : '' %>><%= s.replace(/_/g, ' ') %></option>
+      <% }); %>
+    </select>
+  </form>
+</div>
+
+<div class="card overflow-x-auto">
+  <table class="w-full text-sm">
+    <thead class="bg-dough/40 text-cocoa-light text-left">
+      <tr>
+        <th class="px-4 py-3">Order</th>
+        <th class="px-4 py-3">Customer</th>
+        <th class="px-4 py-3">Branch</th>
+        <th class="px-4 py-3">Method</th>
+        <th class="px-4 py-3">Total</th>
+        <th class="px-4 py-3">Status</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% orders.forEach(function(order) { %>
+        <tr class="border-t border-dough/60 hover:bg-dough/20 cursor-pointer" onclick="window.location='/admin/orders/<%= order.id %>'">
+          <td class="px-4 py-3 font-medium text-cocoa"><%= order.orderNumber %></td>
+          <td class="px-4 py-3 text-cocoa-light"><%= order.User ? order.User.fullName : '—' %></td>
+          <td class="px-4 py-3 text-cocoa-light"><%= order.Branch ? order.Branch.name : 'Unassigned' %></td>
+          <td class="px-4 py-3 text-cocoa-light"><%= order.deliveryMethod %></td>
+          <td class="px-4 py-3 font-semibold text-cocoa">&#8358;<%= Number(order.total).toLocaleString() %></td>
+          <td class="px-4 py-3">
+            <span class="text-xs font-semibold uppercase px-2 py-1 rounded-full <%= order.status === 'completed' ? 'bg-forest/10 text-forest' : order.status === 'cancelled' ? 'bg-caramel-dark/10 text-caramel-dark' : 'bg-caramel/10 text-caramel-dark' %>"><%= order.status.replace(/_/g, ' ') %></span>
+          </td>
+        </tr>
+      <% }); %>
+      <% if (!orders.length) { %>
+        <tr><td colspan="6" class="px-4 py-8 text-center text-cocoa-light">No orders found.</td></tr>
+      <% } %>
+    </tbody>
+  </table>
+</div>

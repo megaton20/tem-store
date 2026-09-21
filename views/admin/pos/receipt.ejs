@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Receipt <%= order.orderNumber %></title>
+  <link rel="stylesheet" href="/css/output.css">
+</head>
+<body class="bg-cream text-cocoa p-8">
+  <div class="max-w-sm mx-auto card p-6">
+    <div class="text-center mb-4">
+      <p class="font-display font-bold text-xl">TEM Store</p>
+      <p class="text-xs text-cocoa-light"><%= order.Branch.name %></p>
+      <p class="text-xs text-cocoa-light"><%= order.Branch.address %></p>
+    </div>
+    <div class="border-t border-dough my-3"></div>
+    <p class="text-xs text-cocoa-light"><%= order.orderNumber %> &middot; <%= new Date(order.createdAt).toLocaleString() %></p>
+    <% if (order.walkInCustomerName) { %><p class="text-xs text-cocoa-light">Customer: <%= order.walkInCustomerName %></p><% } %>
+    <div class="border-t border-dough my-3"></div>
+    <% order.OrderItems.forEach(function(item) { %>
+      <div class="flex justify-between text-sm py-1">
+        <span><%= item.productName %> &times; <%= item.quantity %></span>
+        <span>&#8358;<%= Number(item.lineTotal).toLocaleString() %></span>
+      </div>
+    <% }); %>
+    <div class="border-t border-dough my-3"></div>
+    <div class="flex justify-between font-bold"><span>Total</span><span>&#8358;<%= Number(order.total).toLocaleString() %></span></div>
+    <p class="text-xs text-cocoa-light mt-1">Paid via <%= order.paymentMethod.replace(/_/g, ' ') %></p>
+    <p class="text-center text-xs text-cocoa-light mt-6">Thank you for shopping with TEM Store.</p>
+    <button onclick="window.print()" class="btn-secondary w-full mt-4 text-sm print:hidden">Print Receipt</button>
+    <a href="/admin/pos" class="block text-center text-sm text-caramel font-semibold mt-3 print:hidden">New Sale</a>
+  </div>
+</body>
+</html>

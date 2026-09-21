@@ -1,0 +1,44 @@
+<h1 class="text-2xl font-bold text-cocoa mb-1">My Deliveries</h1>
+<% if (typeof completedToday !== 'undefined') { %>
+  <p class="text-sm text-cocoa-light mb-6">Completed today: <span class="font-semibold text-cocoa"><%= completedToday %></span></p>
+<% } %>
+
+<% if (typeof error !== 'undefined' && error) { %>
+  <div class="bg-caramel-dark/10 border border-caramel-dark/30 text-caramel-dark rounded-xl px-4 py-3 mb-6 text-sm"><%= error %></div>
+<% } %>
+
+<% if (!deliveries.length) { %>
+  <div class="card p-10 text-center text-cocoa-light">No deliveries assigned to you right now.</div>
+<% } else { %>
+  <div class="space-y-4">
+    <% deliveries.forEach(function(shipment) { %>
+      <div class="card p-5">
+        <div class="flex items-center justify-between mb-3">
+          <div>
+            <p class="font-semibold text-cocoa"><%= shipment.recipientName %></p>
+            <p class="text-xs text-cocoa-light"><%= shipment.deliveryAddress %>, <%= shipment.deliveryCity %>, <%= shipment.deliveryState %></p>
+            <p class="text-xs text-cocoa-light">Phone: <%= shipment.recipientPhone %></p>
+            <% if (shipment.pickupBranch) { %><p class="text-xs text-cocoa-light">Pick up from: <%= shipment.pickupBranch.name %></p><% } %>
+          </div>
+          <span class="text-xs font-semibold uppercase px-2 py-1 rounded-full bg-caramel/10 text-caramel-dark whitespace-nowrap"><%= shipment.status.replace(/_/g, ' ') %></span>
+        </div>
+
+        <div class="bg-dough/30 rounded-lg p-3 mb-3">
+          <p class="text-xs font-semibold uppercase text-cocoa-light mb-1">Carrying</p>
+          <p class="text-sm text-cocoa"><%= shipment.manifest %></p>
+        </div>
+
+        <% if (shipment.status === 'assigned') { %>
+          <form action="/admin/rider/shipments/<%= shipment.id %>/start" method="POST">
+            <button type="submit" class="btn-primary w-full !py-2 text-sm">Start Delivery</button>
+          </form>
+        <% } else if (shipment.status === 'out_for_delivery') { %>
+          <form action="/admin/rider/shipments/<%= shipment.id %>/complete" method="POST" class="flex gap-2">
+            <input type="text" name="code" required placeholder="Recipient's confirmation code" class="input-field !py-2 flex-1 uppercase">
+            <button type="submit" class="btn-primary !py-2 text-sm">Complete</button>
+          </form>
+        <% } %>
+      </div>
+    <% }); %>
+  </div>
+<% } %>
