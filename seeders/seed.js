@@ -2,7 +2,7 @@ require('dotenv').config();
 const bcrypt = require('bcryptjs');
 const slugify = require('slugify');
 const {
-  sequelize, Category, Product, Branch, DeliveryZone, SubscriptionTier, User, BranchInventory, TeamMember, CourierZone, LoyaltyTier,
+  sequelize, Category, Product, Branch, DeliveryZone, SubscriptionTier, User, BranchInventory, TeamMember, CourierZone, LoyaltyTier, OperatingLocation,
 } = require('../models');
 const inventoryService = require('../services/inventoryService');
 
@@ -173,6 +173,15 @@ async function seed({ sync = true } = {}) {
   ];
   for (const tier of loyaltyTierSeed) {
     await LoyaltyTier.findOrCreate({ where: { stageNumber: tier.stageNumber }, defaults: tier });
+  }
+
+  // ---- Operating locations (super-admin-controlled - what customers can select) ----
+  const operatingLocationSeed = [
+    { state: 'Cross River', city: 'Calabar Municipal', sortOrder: 1 },
+    { state: 'Cross River', city: 'Calabar South', sortOrder: 2 },
+  ];
+  for (const loc of operatingLocationSeed) {
+    await OperatingLocation.findOrCreate({ where: { state: loc.state, city: loc.city }, defaults: loc });
   }
 
   // ---- Default super admin account (change this password immediately) ----

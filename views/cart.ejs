@@ -9,19 +9,33 @@
   <% } else { %>
     <div class="space-y-4">
       <% items.forEach(function(item) { %>
-        <div class="card p-4 flex items-center gap-4">
-          <img src="<%= item.Product.imageUrl %>" alt="<%= item.Product.name %>" class="w-20 h-20 object-contain bg-dough/40 rounded-xl p-2" onerror="this.src='https://via.placeholder.com/100/EFE0C8/3A2317?text=TEM'">
-          <div class="flex-1">
+        <div class="card p-4 flex flex-wrap items-center gap-x-4 gap-y-3">
+          <img src="<%= item.Product.imageUrl %>" alt="<%= item.Product.name %>" class="w-16 h-16 sm:w-20 sm:h-20 object-contain bg-dough/40 rounded-xl p-2 flex-shrink-0" onerror="this.src='https://via.placeholder.com/100/EFE0C8/3A2317?text=TEM'">
+
+          <div class="flex-1 min-w-[140px]">
             <a href="/product/<%= item.Product.slug %>" class="font-semibold text-cocoa hover:text-caramel"><%= item.Product.name %></a>
             <p class="text-sm text-cocoa-light">&#8358;<%= Number(item.unitPrice).toLocaleString() %> each</p>
           </div>
-          <form action="/cart/<%= item.id %>/update" method="POST" class="flex items-center gap-2">
-            <input type="number" name="quantity" value="<%= item.quantity %>" min="0" class="input-field !w-16 !py-2 text-center">
-            <button type="submit" class="btn-secondary !py-2 !px-3 text-xs">Update</button>
-          </form>
-          <p class="font-semibold text-cocoa w-24 text-right">&#8358;<%= (Number(item.unitPrice) * item.quantity).toLocaleString() %></p>
-          <form action="/cart/<%= item.id %>/remove" method="POST">
-            <button type="submit" class="text-cocoa-light hover:text-caramel-dark" aria-label="Remove">&times;</button>
+
+          <!-- Simple +/- buttons, no typing a number and no separate Update
+               button - each tap submits immediately and the page reflects
+               the new subtotal right away. -->
+          <div class="flex items-center gap-2 flex-shrink-0">
+            <form action="/cart/<%= item.id %>/update" method="POST">
+              <input type="hidden" name="quantity" value="<%= item.quantity - 1 %>">
+              <button type="submit" class="w-8 h-8 rounded-full bg-dough/60 hover:bg-dough text-cocoa font-bold flex items-center justify-center" aria-label="Decrease quantity">&minus;</button>
+            </form>
+            <span class="w-6 text-center font-semibold text-cocoa"><%= item.quantity %></span>
+            <form action="/cart/<%= item.id %>/update" method="POST">
+              <input type="hidden" name="quantity" value="<%= item.quantity + 1 %>">
+              <button type="submit" class="w-8 h-8 rounded-full bg-caramel hover:bg-caramel-dark text-cream font-bold flex items-center justify-center" aria-label="Increase quantity">+</button>
+            </form>
+          </div>
+
+          <p class="font-semibold text-cocoa w-20 text-right flex-shrink-0">&#8358;<%= (Number(item.unitPrice) * item.quantity).toLocaleString() %></p>
+
+          <form action="/cart/<%= item.id %>/remove" method="POST" class="flex-shrink-0">
+            <button type="submit" class="text-cocoa-light hover:text-caramel-dark text-xl leading-none" aria-label="Remove">&times;</button>
           </form>
         </div>
       <% }); %>

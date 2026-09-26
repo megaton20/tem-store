@@ -47,20 +47,46 @@
       </div>
       <div class="grid sm:grid-cols-2 gap-4">
         <div>
-          <label class="block text-sm font-medium text-cocoa mb-2">City</label>
-          <select name="city" required class="input-field">
-            <option value="">Select a city</option>
-            <% cities.forEach(function(c) { %><option value="<%= c %>" <%= old.city === c ? 'selected' : '' %>><%= c %></option><% }); %>
-          </select>
-        </div>
-        <div>
           <label class="block text-sm font-medium text-cocoa mb-2">State</label>
-          <select name="state" required class="input-field">
+          <select id="rider-state" onchange="riderPopulateCities()" class="input-field">
             <option value="">Select a state</option>
             <% states.forEach(function(s) { %><option value="<%= s %>" <%= (old.state || 'Cross River') === s ? 'selected' : '' %>><%= s %></option><% }); %>
           </select>
+          <input type="hidden" name="state" id="rider-state-hidden" value="<%= old.state || 'Cross River' %>">
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-cocoa mb-2">City</label>
+          <select name="city" id="rider-city" required onchange="riderHandleCityChange()" class="input-field">
+            <option value="">Select a state first</option>
+          </select>
         </div>
       </div>
+      <div id="rider-other-message" class="hidden bg-caramel/10 border border-caramel/30 rounded-xl p-4">
+        <p class="text-sm text-cocoa">We don't operate in your area yet — we're still expanding! We'll keep your application on file.</p>
+      </div>
+      <script>
+        const RIDER_LOCATIONS = <%- JSON.stringify(locationsByState) %>;
+        function riderPopulateCities(preselectCity) {
+          const state = document.getElementById('rider-state').value;
+          document.getElementById('rider-state-hidden').value = state;
+          const citySelect = document.getElementById('rider-city');
+          citySelect.innerHTML = state ? '<option value="">Select a city</option>' : '<option value="">Select a state first</option>';
+          (RIDER_LOCATIONS[state] || []).forEach(function (c) {
+            const opt = document.createElement('option');
+            opt.value = c; opt.textContent = c;
+            citySelect.appendChild(opt);
+          });
+          const otherOpt = document.createElement('option');
+          otherOpt.value = 'Other'; otherOpt.textContent = 'Other (not listed)';
+          citySelect.appendChild(otherOpt);
+          if (preselectCity) citySelect.value = preselectCity;
+          riderHandleCityChange();
+        }
+        function riderHandleCityChange() {
+          document.getElementById('rider-other-message').classList.toggle('hidden', document.getElementById('rider-city').value !== 'Other');
+        }
+        riderPopulateCities('<%= old.city || "" %>');
+      </script>
       <div>
         <label class="block text-sm font-medium text-cocoa mb-2">What will you be riding/driving?</label>
         <select name="vehicleType" required class="input-field">

@@ -21,6 +21,7 @@ const PosApplication = require('./PosApplication');
 const Setting = require('./Setting');
 const LoyaltyTier = require('./LoyaltyTier');
 const LoyaltyReward = require('./LoyaltyReward');
+const OperatingLocation = require('./OperatingLocation');
 const TeamMember = require('./TeamMember');
 const Shipment = require('./Shipment');
 const CourierZone = require('./CourierZone');
@@ -180,6 +181,7 @@ module.exports = {
   Setting,
   LoyaltyTier,
   LoyaltyReward,
+  OperatingLocation,
   TeamMember,
   Shipment,
   CourierZone,

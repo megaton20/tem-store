@@ -45,17 +45,67 @@
       </div>
       <div class="grid grid-cols-2 gap-4 mt-4">
         <div>
-          <label class="block text-sm font-medium text-cocoa mb-2">City</label>
-          <input type="text" name="city" value="<%= old.city || '' %>" class="input-field" placeholder="Calabar">
+          <label class="block text-sm font-medium text-cocoa mb-2">State</label>
+          <select id="reg-state" onchange="regPopulateCities()" class="input-field">
+            <option value="">Select a state</option>
+            <% states.forEach(function(s) { %><option value="<%= s %>" <%= (old.state || 'Cross River') === s ? 'selected' : '' %>><%= s %></option><% }); %>
+          </select>
+          <input type="hidden" name="state" id="reg-state-hidden" value="<%= old.state || 'Cross River' %>">
         </div>
         <div>
-          <label class="block text-sm font-medium text-cocoa mb-2">State</label>
-          <input type="text" name="state" value="<%= old.state || 'Cross River' %>" class="input-field">
+          <label class="block text-sm font-medium text-cocoa mb-2">City</label>
+          <select name="city" id="reg-city" onchange="regHandleCityChange()" class="input-field">
+            <option value="">Select a state first</option>
+          </select>
         </div>
+      </div>
+
+      <div id="reg-other-message" class="hidden mt-3 bg-caramel/10 border border-caramel/30 rounded-xl p-4">
+        <p class="text-sm text-cocoa">We don't ship to your area at the moment — we're still expanding! You can update this on your profile once we reach you.</p>
+        <label class="block text-sm font-medium text-cocoa mt-3 mb-2">Tell us your city (optional)</label>
+        <input type="text" name="otherLocationNote" value="<%= old.otherLocationNote || '' %>" class="input-field" placeholder="Helps us know where to expand next">
       </div>
     </div>
 
     <button type="submit" class="btn-primary w-full">Create Account</button>
+
+    <script>
+      const REG_LOCATIONS = <%- JSON.stringify(locationsByState) %>;
+
+      function regPopulateCities(preselectCity) {
+        const state = document.getElementById('reg-state').value;
+        document.getElementById('reg-state-hidden').value = state;
+        const citySelect = document.getElementById('reg-city');
+        citySelect.innerHTML = '';
+
+        const cities = REG_LOCATIONS[state] || [];
+        if (!state) {
+          citySelect.innerHTML = '<option value="">Select a state first</option>';
+        } else {
+          citySelect.innerHTML = '<option value="">Select a city</option>';
+          cities.forEach(function (c) {
+            const opt = document.createElement('option');
+            opt.value = c;
+            opt.textContent = c;
+            citySelect.appendChild(opt);
+          });
+        }
+        const otherOpt = document.createElement('option');
+        otherOpt.value = 'Other';
+        otherOpt.textContent = 'Other (not listed)';
+        citySelect.appendChild(otherOpt);
+
+        if (preselectCity) citySelect.value = preselectCity;
+        regHandleCityChange();
+      }
+
+      function regHandleCityChange() {
+        const isOther = document.getElementById('reg-city').value === 'Other';
+        document.getElementById('reg-other-message').classList.toggle('hidden', !isOther);
+      }
+
+      regPopulateCities('<%= old.city || "" %>');
+    </script>
   </form>
 
   <p class="text-sm text-cocoa-light mt-6 text-center">

@@ -33,6 +33,11 @@ const User = sequelize.define('User', {
     type: DataTypes.STRING,
     defaultValue: 'Cross River',
   },
+  // When city is 'Other' (i.e. their real city isn't in our operating
+  // list yet), this optionally captures what they actually typed - useful
+  // for spotting expansion demand, and lets them find/select the real
+  // entry themselves once we add it.
+  otherLocationNote: { type: DataTypes.STRING, allowNull: true, field: 'other_location_note' },
   isVerified: {
     type: DataTypes.BOOLEAN,
     defaultValue: false,

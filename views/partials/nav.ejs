@@ -15,6 +15,7 @@
     <div class="flex items-center gap-4">
       <% if (typeof currentUser !== 'undefined' && currentUser) { %>
         <a href="/orders" class="hidden sm:inline text-sm font-medium text-cocoa-light hover:text-cocoa">My Orders</a>
+        <a href="/profile" class="hidden sm:inline text-sm font-medium text-cocoa-light hover:text-cocoa">Profile</a>
         <form action="/logout" method="POST" class="hidden sm:block">
           <button type="submit" class="text-sm font-medium text-cocoa-light hover:text-cocoa">Log out</button>
         </form>

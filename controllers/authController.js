@@ -3,6 +3,8 @@ const crypto = require('crypto');
 const { User } = require('../models');
 const { mergeGuestCartIntoUser } = require('../services/cartService');
 const emailService = require('../services/emailService');
+const { getOperatingLocationsGrouped } = require('../services/locationService');
+const NIGERIA_STATES = require('../utils/nigeriaStates');
 
 // Where each role lands after logging in. Customers go to the storefront
 // (or wherever they were headed, e.g. checkout); every staff role goes
@@ -28,17 +30,20 @@ function redirectIfAuthenticated(req, res, next) {
   next();
 }
 
-function showRegister(req, res) {
+async function showRegister(req, res) {
+  const locationsByState = await getOperatingLocationsGrouped();
   res.render('auth/register', {
     title: 'Create your account',
     errors: [],
     old: {},
     next: req.query.next || '/',
+    locationsByState,
+    states: NIGERIA_STATES,
   });
 }
 
 async function register(req, res) {
-  const { fullName, email, phone, password, confirmPassword, address, city, state } = req.body;
+  const { fullName, email, phone, password, confirmPassword, address, city, state, otherLocationNote } = req.body;
   const errors = [];
 
   if (!fullName || fullName.trim().length < 2) errors.push('Please enter your full name.');
@@ -53,11 +58,14 @@ async function register(req, res) {
   }
 
   if (errors.length) {
+    const locationsByState = await getOperatingLocationsGrouped();
     return res.render('auth/register', {
       title: 'Create your account',
       errors,
       old: req.body,
       next: req.body.next || '/',
+      locationsByState,
+      states: NIGERIA_STATES,
     });
   }
 
@@ -69,8 +77,12 @@ async function register(req, res) {
     phone: phone.trim(),
     passwordHash,
     address: address ? address.trim() : null,
+    // 'Other' means their real city isn't in our operating list yet -
+    // otherLocationNote optionally captures what they actually typed,
+    // useful for spotting expansion demand.
     city: city ? city.trim() : null,
     state: state ? state.trim() : 'Cross River',
+    otherLocationNote: city === 'Other' && otherLocationNote ? otherLocationNote.trim() : null,
     verificationToken,
   });
 

@@ -37,6 +37,7 @@ const ROLE_NAV = {
     { href: '/admin/logistics/book', label: 'Book Walk-in Delivery', skeleton: 'form' },
     { href: '/admin/courier-zones', label: 'Courier Zones & Pricing', skeleton: 'table' },
     { href: '/admin/delivery-zones', label: 'Delivery Zones & Pricing', skeleton: 'table' },
+    { href: '/admin/operating-locations', label: 'Operating Locations', skeleton: 'table' },
     { href: '/admin/pos', label: 'POS Terminal', skeleton: 'pos' },
     { href: '/admin/staff', label: 'Staff', skeleton: 'table' },
     { href: '/admin/branches', label: 'Branches', skeleton: 'cards' },

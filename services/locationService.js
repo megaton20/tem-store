@@ -1,26 +1,24 @@
-const { Branch, DeliveryZone, CourierZone } = require('../models');
+const { OperatingLocation } = require('../models');
 
 /**
- * Every city TEM Store actually has a presence or reach in - combined
- * from branches, delivery zones, and courier zones. Used to populate
- * city dropdowns (registration, profile, rider/POS applications) with
- * real, known cities instead of free text or a fabricated exhaustive
- * list of every city in Nigeria.
+ * The super-admin-controlled list of cities TEM Store operates in,
+ * grouped as { state: [city, ...] } for cascading state -> city
+ * dropdowns (registration, profile, staff applications). Every one of
+ * those dropdowns also appends an "Other" option itself - this service
+ * only returns what we actually cover.
  */
-async function getKnownCities() {
-  const [branches, deliveryZones, courierZones] = await Promise.all([
-    Branch.findAll({ attributes: ['city'] }),
-    DeliveryZone.findAll({ attributes: ['city'] }),
-    CourierZone.findAll({ attributes: ['city'] }),
-  ]);
+async function getOperatingLocationsGrouped() {
+  const locations = await OperatingLocation.findAll({
+    where: { isActive: true },
+    order: [['state', 'ASC'], ['sortOrder', 'ASC'], ['city', 'ASC']],
+  });
 
-  const cities = new Set([
-    ...branches.map((b) => b.city),
-    ...deliveryZones.map((z) => z.city),
-    ...courierZones.map((z) => z.city),
-  ]);
-
-  return Array.from(cities).filter(Boolean).sort();
+  const grouped = {};
+  locations.forEach((loc) => {
+    if (!grouped[loc.state]) grouped[loc.state] = [];
+    grouped[loc.state].push(loc.city);
+  });
+  return grouped;
 }
 
-module.exports = { getKnownCities };
+module.exports = { getOperatingLocationsGrouped };

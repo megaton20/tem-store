@@ -28,10 +28,41 @@
       </div>
     </aside>
 
+    <!-- Mobile nav drawer: same content as the desktop sidebar, off-canvas
+         and toggled by the hamburger button below. Only exists in the DOM
+         on mobile widths (md:hidden), but the toggle JS works regardless. -->
+    <div id="mobile-nav-backdrop" class="hidden md:hidden fixed inset-0 z-40 bg-cocoa/50" onclick="closeMobileNav()"></div>
+    <aside id="mobile-nav-drawer" class="md:hidden fixed inset-y-0 left-0 z-50 w-72 bg-cocoa text-cream flex flex-col transform -translate-x-full transition-transform duration-200">
+      <div class="px-6 py-5 border-b border-cream/10 flex items-start justify-between">
+        <div>
+          <a href="/admin" class="font-display text-xl font-bold">TEM<span class="text-caramel">Admin</span></a>
+          <p class="text-xs text-cream/50 mt-1"><%= currentUser.fullName %> &middot; <%= currentUser.role.replace(/_/g, ' ') %></p>
+        </div>
+        <button type="button" onclick="closeMobileNav()" class="text-cream/60 text-2xl leading-none">&times;</button>
+      </div>
+      <nav class="flex-1 px-3 py-4 space-y-1 text-sm overflow-y-auto">
+        <% (typeof roleNav !== 'undefined' ? roleNav : []).forEach(function(item) { %>
+          <a href="<%= item.href %>" data-skeleton="<%= item.skeleton || 'table' %>" class="skeleton-link block px-3 py-2 rounded-lg hover:bg-cream/10" onclick="closeMobileNav()"><%= item.label %></a>
+        <% }); %>
+      </nav>
+      <div class="px-3 py-4 border-t border-cream/10 space-y-1">
+        <a href="/admin/profile" data-skeleton="form" class="skeleton-link block px-3 py-2 rounded-lg hover:bg-cream/10 text-sm text-cream/70" onclick="closeMobileNav()">My Profile</a>
+        <a href="/" class="block px-3 py-2 rounded-lg hover:bg-cream/10 text-sm text-cream/70">&larr; Back to Storefront</a>
+        <form action="/logout" method="POST">
+          <button type="submit" class="w-full text-left px-3 py-2 rounded-lg hover:bg-cream/10 text-sm text-cream/70">Log out</button>
+        </form>
+      </div>
+    </aside>
+
     <main class="flex-1 min-w-0 relative">
       <header class="md:hidden bg-cocoa text-cream px-4 py-3 flex items-center justify-between">
+        <button type="button" onclick="openMobileNav()" aria-label="Open menu" class="p-1 -ml-1">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+          </svg>
+        </button>
         <span class="font-display font-bold">TEM<span class="text-caramel">Admin</span></span>
-        <a href="/admin" class="text-sm text-cream/70">Menu</a>
+        <span class="w-6"></span>
       </header>
 
       <!-- Skeleton overlay: one variant per page layout shape, toggled by JS
@@ -147,6 +178,20 @@
     //    nothing ever told it to hide again. `pageshow` fixes that.
     let skeletonShowTimer = null;
     let skeletonSafetyTimer = null;
+
+    // Mobile nav drawer - slides in from the left, backdrop click or the
+    // × closes it. Reset on pageshow too, same reasoning as the skeleton
+    // overlay: a page restored from bfcache shouldn't come back with the
+    // drawer stuck open from before the person navigated away.
+    function openMobileNav() {
+      document.getElementById('mobile-nav-drawer').classList.remove('-translate-x-full');
+      document.getElementById('mobile-nav-backdrop').classList.remove('hidden');
+    }
+    function closeMobileNav() {
+      document.getElementById('mobile-nav-drawer').classList.add('-translate-x-full');
+      document.getElementById('mobile-nav-backdrop').classList.add('hidden');
+    }
+    window.addEventListener('pageshow', closeMobileNav);
 
     function showSkeleton(variant) {
       clearTimeout(skeletonShowTimer);

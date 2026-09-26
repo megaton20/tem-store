@@ -94,17 +94,68 @@
       </div>
       <div class="grid grid-cols-2 gap-4">
         <div>
-          <label class="block text-sm font-medium text-cocoa mb-2">City</label>
-          <input type="text" name="city" value="<%= currentUser.city || '' %>" class="input-field">
+          <label class="block text-sm font-medium text-cocoa mb-2">State</label>
+          <select id="prof-state" onchange="profPopulateCities()" class="input-field">
+            <option value="">Select a state</option>
+            <% states.forEach(function(s) { %><option value="<%= s %>" <%= currentUser.state === s ? 'selected' : '' %>><%= s %></option><% }); %>
+          </select>
+          <input type="hidden" name="state" id="prof-state-hidden" value="<%= currentUser.state || '' %>">
         </div>
         <div>
-          <label class="block text-sm font-medium text-cocoa mb-2">State</label>
-          <input type="text" name="state" value="<%= currentUser.state || '' %>" class="input-field">
+          <label class="block text-sm font-medium text-cocoa mb-2">City</label>
+          <select name="city" id="prof-city" onchange="profHandleCityChange()" class="input-field">
+            <option value="">Select a state first</option>
+          </select>
         </div>
       </div>
+
+      <div id="prof-other-message" class="hidden bg-caramel/10 border border-caramel/30 rounded-xl p-4">
+        <p class="text-sm text-cocoa">We don't ship to your area at the moment — we're still expanding! Come back and update this once we reach you.</p>
+        <label class="block text-sm font-medium text-cocoa mt-3 mb-2">Tell us your city (optional)</label>
+        <input type="text" name="otherLocationNote" value="<%= currentUser.otherLocationNote || '' %>" class="input-field" placeholder="Helps us know where to expand next">
+      </div>
+
       <button type="submit" class="btn-primary w-full">Save Changes</button>
     </form>
   </div>
+
+  <script>
+    const PROF_LOCATIONS = <%- JSON.stringify(locationsByState) %>;
+
+    function profPopulateCities(preselectCity) {
+      const state = document.getElementById('prof-state').value;
+      document.getElementById('prof-state-hidden').value = state;
+      const citySelect = document.getElementById('prof-city');
+      citySelect.innerHTML = '';
+
+      const cities = PROF_LOCATIONS[state] || [];
+      if (!state) {
+        citySelect.innerHTML = '<option value="">Select a state first</option>';
+      } else {
+        citySelect.innerHTML = '<option value="">Select a city</option>';
+        cities.forEach(function (c) {
+          const opt = document.createElement('option');
+          opt.value = c;
+          opt.textContent = c;
+          citySelect.appendChild(opt);
+        });
+      }
+      const otherOpt = document.createElement('option');
+      otherOpt.value = 'Other';
+      otherOpt.textContent = 'Other (not listed)';
+      citySelect.appendChild(otherOpt);
+
+      if (preselectCity) citySelect.value = preselectCity;
+      profHandleCityChange();
+    }
+
+    function profHandleCityChange() {
+      const isOther = document.getElementById('prof-city').value === 'Other';
+      document.getElementById('prof-other-message').classList.toggle('hidden', !isOther);
+    }
+
+    profPopulateCities('<%= currentUser.city || "" %>');
+  </script>
 
   <div class="card p-6">
     <h2 class="font-bold text-cocoa mb-4">Change Password</h2>

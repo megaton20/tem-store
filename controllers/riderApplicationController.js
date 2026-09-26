@@ -1,6 +1,6 @@
 const { RiderApplication } = require('../models');
 const settingsService = require('../services/settingsService');
-const { getKnownCities } = require('../services/locationService');
+const { getOperatingLocationsGrouped } = require('../services/locationService');
 const NIGERIA_STATES = require('../utils/nigeriaStates');
 
 async function showApplyForm(req, res) {
@@ -23,9 +23,9 @@ async function showApplyForm(req, res) {
     order: [['createdAt', 'DESC']],
   });
 
-  const [cities, states] = await Promise.all([getKnownCities(), NIGERIA_STATES]);
+  const locationsByState = await getOperatingLocationsGrouped();
   res.render('pages/apply-rider', {
-    title: 'Apply to be a Rider — TEM Store', errors: [], submitted: false, existing, cities, states, old: {},
+    title: 'Apply to be a Rider — TEM Store', errors: [], submitted: false, existing, locationsByState, states: NIGERIA_STATES, old: {},
   });
 }
 
@@ -38,11 +38,11 @@ async function submitApplication(req, res) {
     order: [['createdAt', 'DESC']],
   });
   if (existing && ['pending', 'approved'].includes(existing.status)) {
-    const [cities, states] = await Promise.all([getKnownCities(), NIGERIA_STATES]);
+    const locationsByState = await getOperatingLocationsGrouped();
     return res.render('pages/apply-rider', {
       title: 'Apply to be a Rider — TEM Store',
       errors: [existing.status === 'approved' ? "You're already a registered rider." : 'You already have an application under review.'],
-      submitted: false, existing, cities, states, old: {},
+      submitted: false, existing, locationsByState, states: NIGERIA_STATES, old: {},
     });
   }
 
@@ -54,9 +54,9 @@ async function submitApplication(req, res) {
   if (!hasValidId) errors.push('A valid government-issued ID is required to apply.');
 
   if (errors.length) {
-    const [cities, states] = await Promise.all([getKnownCities(), NIGERIA_STATES]);
+    const locationsByState = await getOperatingLocationsGrouped();
     return res.render('pages/apply-rider', {
-      title: 'Apply to be a Rider — TEM Store', errors, submitted: false, existing, cities, states, old: req.body,
+      title: 'Apply to be a Rider — TEM Store', errors, submitted: false, existing, locationsByState, states: NIGERIA_STATES, old: req.body,
     });
   }
 
@@ -78,7 +78,7 @@ async function submitApplication(req, res) {
   });
 
   res.render('pages/apply-rider', {
-    title: 'Apply to be a Rider — TEM Store', errors: [], submitted: true, existing: null, cities: [], states: NIGERIA_STATES, old: {},
+    title: 'Apply to be a Rider — TEM Store', errors: [], submitted: true, existing: null, locationsByState: {}, states: NIGERIA_STATES, old: {},
   });
 }
 

@@ -18,6 +18,7 @@ const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 5 *
 const logisticsController = require('../controllers/admin/logisticsController');
 const courierZoneController = require('../controllers/admin/courierZoneController');
 const deliveryZoneController = require('../controllers/admin/deliveryZoneController');
+const operatingLocationController = require('../controllers/admin/operatingLocationController');
 const docsController = require('../controllers/admin/docsController');
 const adminProfileController = require('../controllers/admin/profileController');
 
@@ -94,6 +95,10 @@ router.get('/admin/delivery-zones', requirePermission('staff'), deliveryZoneCont
 router.post('/admin/delivery-zones', requirePermission('staff'), deliveryZoneController.createZone);
 router.post('/admin/delivery-zones/:id', requirePermission('staff'), deliveryZoneController.updateZone);
 router.post('/admin/delivery-zones/:id/toggle', requirePermission('staff'), deliveryZoneController.toggleActive);
+
+router.get('/admin/operating-locations', requirePermission('staff'), operatingLocationController.listLocations);
+router.post('/admin/operating-locations', requirePermission('staff'), operatingLocationController.createLocation);
+router.post('/admin/operating-locations/:id/toggle', requirePermission('staff'), operatingLocationController.toggleActive);
 
 // Rider applications review - super_admin only
 router.get('/admin/rider-applications', requirePermission('rider_apps'), riderAppController.listApplications);
