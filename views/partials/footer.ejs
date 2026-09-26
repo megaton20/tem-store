@@ -55,4 +55,10 @@
       <a href="/vault/redeem" class="hover:text-vault-gold">Exclusive Access</a>
     </div>
   </div>
+
+   <a href="/admin" class="flex flex-col items-center gap-1 py-2.5 relative">
+      <% if (typeof currentUser !== 'undefined' && currentUser && currentUser.role !== 'customer') { %>
+        <span class="absolute top-1 right-6 bg-caramel text-cream text-[9px] font-bold w-4 h-4 rounded-full flex items-center justify-center">Admin</span>        
+        <% } %>
+   </a>
 </footer>
