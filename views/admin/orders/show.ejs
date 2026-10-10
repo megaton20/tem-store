@@ -1,0 +1,125 @@
+<a href="/admin/orders" class="text-sm text-cocoa-light hover:text-cocoa">&larr; All Orders</a>
+
+<div class="flex items-center justify-between mt-4 mb-6">
+  <div>
+    <h1 class="text-2xl font-bold text-cocoa"><%= order.orderNumber %></h1>
+    <p class="text-sm text-cocoa-light"><%= new Date(order.createdAt).toLocaleString() %></p>
+  </div>
+  <span class="text-xs font-semibold uppercase px-3 py-1.5 rounded-full bg-caramel/10 text-caramel-dark"><%= order.status.replace(/_/g, ' ') %></span>
+</div>
+
+<div class="grid lg:grid-cols-3 gap-6">
+  <div class="lg:col-span-2 space-y-6">
+    <div class="card p-6">
+      <h2 class="font-bold text-cocoa mb-4">Items</h2>
+      <% order.OrderItems.forEach(function(item) { %>
+        <div class="flex justify-between text-sm border-b border-dough/60 py-2">
+          <span class="text-cocoa-light"><%= item.productName %> &times; <%= item.quantity %></span>
+          <span class="text-cocoa font-medium">&#8358;<%= Number(item.lineTotal).toLocaleString() %></span>
+        </div>
+      <% }); %>
+      <div class="flex justify-between font-bold text-cocoa text-base mt-3 pt-3 border-t border-dough">
+        <span>Total</span><span>&#8358;<%= Number(order.total).toLocaleString() %></span>
+      </div>
+    </div>
+
+    <div class="card p-6">
+      <h2 class="font-bold text-cocoa mb-3">Fulfillment</h2>
+      <p class="text-sm text-cocoa-light">Method: <span class="text-cocoa font-medium"><%= order.deliveryMethod %></span></p>
+      <p class="text-sm text-cocoa-light mt-1">Branch: <span class="text-cocoa font-medium"><%= order.Branch ? order.Branch.name : 'Unassigned' %></span></p>
+      <% if (order.deliveryMethod === 'home') { %>
+        <p class="text-sm text-cocoa-light mt-1"><%= order.deliveryAddress %>, <%= order.deliveryCity %>, <%= order.deliveryState %></p>
+        <p class="text-sm text-cocoa-light">Phone: <%= order.deliveryPhone %></p>
+        <% if (order.expectedReadyAt) { %>
+          <p class="text-sm text-cocoa-light mt-1">Expected ready: <span class="text-cocoa font-medium"><%= new Date(order.expectedReadyAt).toLocaleDateString() %></span> (includes a third-party item)</p>
+        <% } %>
+
+        <div class="mt-4 pt-4 border-t border-dough/60">
+          <p class="text-sm font-medium text-cocoa mb-2">Rider</p>
+          <% if (order.rider) { %>
+            <p class="text-sm text-cocoa-light"><%= order.rider.fullName %> &middot; <%= order.rider.phone %></p>
+          <% } else { %>
+            <p class="text-sm text-cocoa-light mb-2">Not yet assigned.</p>
+          <% } %>
+          <p class="text-xs text-cocoa-light mt-2">Processing, dispatch, and rider assignment happen in <a href="/admin/logistics/queue" class="text-caramel font-semibold">Dispatch Queue</a> (or <a href="/admin/logistics/process" class="text-caramel font-semibold">Process & Dispatch</a> for your branch).</p>
+        </div>
+      <% } %>
+    </div>
+  </div>
+
+  <div class="card p-6 h-fit">
+    <h2 class="font-bold text-cocoa mb-4">Update Status</h2>
+    <% if (nextStatuses.length) { %>
+      <div class="space-y-3">
+        <% nextStatuses.forEach(function(s) { %>
+          <button type="button"
+            onclick="openStatusModal('<%= s %>')"
+            class="w-full <%= s === 'cancelled' ? 'btn-secondary' : 'btn-primary' %> !py-2.5 text-sm capitalize">
+            <%= s.replace(/_/g, ' ') %>
+          </button>
+        <% }); %>
+      </div>
+    <% } else { %>
+      <p class="text-sm text-cocoa-light">No further actions — this order is <%= order.status.replace(/_/g, ' ') %>.</p>
+    <% } %>
+  </div>
+</div>
+
+<!-- Confirmation modal - every status change goes through here, so a
+     misclick never silently changes an order, and completing one always
+     asks for the customer's code rather than letting staff skip that step. -->
+<div id="status-modal" class="fixed inset-0 z-50 hidden items-center justify-center p-4" style="background: rgba(35,52,23,0.5);">
+  <div class="bg-cream rounded-2xl shadow-xl max-w-sm w-full p-6">
+    <h2 class="font-bold text-cocoa text-lg mb-2" id="status-modal-title">Confirm Status Change</h2>
+    <p class="text-sm text-cocoa-light mb-4" id="status-modal-message"></p>
+
+    <form action="/admin/orders/<%= order.id %>/status" method="POST" class="space-y-4">
+      <input type="hidden" name="status" id="status-modal-input">
+
+      <div id="status-modal-code-field" class="hidden">
+        <label class="block text-sm font-medium text-cocoa mb-2">Customer's Confirmation Code</label>
+        <input type="text" name="confirmationCode" id="status-modal-code" class="input-field uppercase tracking-widest" placeholder="e.g. 7K3M9Q">
+        <p class="text-xs text-cocoa-light mt-1">Ask the customer to read this off their order page - it's proof the order actually reached them.</p>
+      </div>
+
+      <div class="flex gap-3">
+        <button type="button" onclick="closeStatusModal()" class="btn-secondary flex-1">Cancel</button>
+        <button type="submit" id="status-modal-submit" class="btn-primary flex-1">Confirm</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+  function openStatusModal(status) {
+    const readable = status.replace(/_/g, ' ');
+    document.getElementById('status-modal-input').value = status;
+    document.getElementById('status-modal-title').textContent =
+      status === 'cancelled' ? 'Cancel This Order?' : 'Confirm Status Change';
+    document.getElementById('status-modal-message').textContent =
+      status === 'cancelled'
+        ? 'This cancels the order and refunds the customer if they already paid. This can\'t be undone.'
+        : `This will mark the order as "${readable}".`;
+
+    const codeField = document.getElementById('status-modal-code-field');
+    const codeInput = document.getElementById('status-modal-code');
+    if (status === 'completed') {
+      codeField.classList.remove('hidden');
+      codeInput.setAttribute('required', 'required');
+    } else {
+      codeField.classList.add('hidden');
+      codeInput.removeAttribute('required');
+      codeInput.value = '';
+    }
+
+    const modal = document.getElementById('status-modal');
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+  }
+
+  function closeStatusModal() {
+    const modal = document.getElementById('status-modal');
+    modal.classList.add('hidden');
+    modal.classList.remove('flex');
+  }
+</script>

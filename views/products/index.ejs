@@ -1,0 +1,52 @@
+<section class="max-w-7xl mx-auto px-5 sm:px-8 py-12">
+  <h1 class="text-3xl font-bold text-cocoa mb-2">
+    <%= typeof discreet !== 'undefined' && discreet ? 'TEM Store' : (activeCategory ? activeCategory.name : 'Shop All') %>
+  </h1>
+  <p class="text-cocoa-light mb-8">
+    <%= typeof discreet !== 'undefined' && discreet ? 'A private, discreetly packaged selection.' : 'Everything TEM Store has to offer.' %>
+  </p>
+
+  <% if (typeof categories !== 'undefined' && categories.length) { %>
+    <div class="flex flex-wrap gap-2 mb-6">
+      <a href="/shop" class="px-4 py-2 rounded-full text-sm font-medium <%= !activeCategory ? 'bg-cocoa text-cream' : 'bg-dough/50 text-cocoa hover:bg-dough' %>">All</a>
+      <% categories.forEach(function(cat) { %>
+        <a href="/shop?category=<%= cat.slug %>" class="px-4 py-2 rounded-full text-sm font-medium <%= activeCategory && activeCategory.id === cat.id ? 'bg-cocoa text-cream' : 'bg-dough/50 text-cocoa hover:bg-dough' %>"><%= cat.name %></a>
+      <% }); %>
+    </div>
+  <% } %>
+
+  <% if (typeof discreet === 'undefined' || !discreet) { %>
+    <form method="GET" class="flex flex-wrap items-center gap-3 mb-10">
+      <% if (activeCategory) { %><input type="hidden" name="category" value="<%= activeCategory.slug %>"><% } %>
+      <input type="text" name="search" value="<%= search %>" placeholder="Search products..." class="input-field !py-2 !w-56">
+      <input type="number" name="minPrice" value="<%= minPrice %>" placeholder="Min ₦" class="input-field !py-2 !w-28">
+      <input type="number" name="maxPrice" value="<%= maxPrice %>" placeholder="Max ₦" class="input-field !py-2 !w-28">
+      <select name="sort" class="input-field !py-2 !w-44">
+        <option value="newest" <%= sort === 'newest' ? 'selected' : '' %>>Newest</option>
+        <option value="price_asc" <%= sort === 'price_asc' ? 'selected' : '' %>>Price: Low to High</option>
+        <option value="price_desc" <%= sort === 'price_desc' ? 'selected' : '' %>>Price: High to Low</option>
+        <option value="name_asc" <%= sort === 'name_asc' ? 'selected' : '' %>>Name: A-Z</option>
+      </select>
+      <button type="submit" class="btn-secondary !py-2 text-sm">Apply</button>
+    </form>
+  <% } %>
+
+  <% if (!products.length) { %>
+    <p class="text-cocoa-light">No products here yet — check back soon.</p>
+  <% } else { %>
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-5 sm:gap-6">
+      <% products.forEach(function(product) { %>
+        <div class="card group">
+          <a href="/product/<%= product.slug %>" class="block aspect-square bg-dough/40 overflow-hidden">
+            <img src="<%= product.imageUrl %>" alt="<%= product.name %>" class="w-full h-full object-contain p-6 group-hover:scale-105 transition-transform duration-300" onerror="this.src='https://via.placeholder.com/400x400/EFE0C8/3A2317?text=TEM'">
+          </a>
+          <div class="p-4">
+            <a href="/product/<%= product.slug %>" class="font-semibold text-cocoa hover:text-caramel line-clamp-1"><%= product.name %></a>
+            <p class="text-cocoa-light text-sm mt-1">&#8358;<%= Number(product.price).toLocaleString() %></p>
+            <div class="mt-3" data-cart-button data-product-id="<%= product.id %>" data-initial-quantity="<%= (cartQuantities && cartQuantities[product.id]) || 0 %>"></div>
+          </div>
+        </div>
+      <% }); %>
+    </div>
+  <% } %>
+</section>

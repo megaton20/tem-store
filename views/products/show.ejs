@@ -1,0 +1,34 @@
+<section class="max-w-6xl mx-auto px-5 sm:px-8 py-12">
+  <nav class="text-sm text-cocoa-light mb-8">
+    <a href="/shop" class="hover:text-caramel">Shop</a> <span class="mx-1">/</span> <%= product.name %>
+  </nav>
+
+  <div class="grid md:grid-cols-2 gap-10">
+    <div class="aspect-square bg-dough/40 rounded-2xl overflow-hidden flex items-center justify-center">
+      <img src="<%= product.imageUrl %>" alt="<%= product.name %>" class="w-full h-full object-contain p-10" onerror="this.src='https://via.placeholder.com/500x500/EFE0C8/3A2317?text=TEM'">
+    </div>
+
+    <div>
+      <% if (product.Category) { %>
+        <span class="text-xs font-semibold uppercase tracking-wide text-forest"><%= product.Category.name %></span>
+      <% } %>
+      <h1 class="text-3xl sm:text-4xl font-bold text-cocoa mt-2"><%= product.name %></h1>
+      <p class="text-2xl text-caramel font-semibold mt-4">&#8358;<%= Number(product.price).toLocaleString() %></p>
+
+      <p class="text-cocoa-light mt-6 leading-relaxed"><%= product.description %></p>
+
+      <% if (product.fulfillmentType === 'third_party') { %>
+        <div class="mt-6 bg-forest/5 border border-forest/20 rounded-xl p-4">
+          <p class="text-sm text-cocoa">Sourced from <%= product.supplierName || 'our supplier' %> on order — ready in about <span class="font-semibold"><%= product.leadTimeDays %> days</span>.</p>
+        </div>
+        <div class="mt-6 max-w-xs" data-cart-button data-product-id="<%= product.id %>" data-initial-quantity="<%= (cartQuantities && cartQuantities[product.id]) || 0 %>"></div>
+      <% } else if (product.stock > 0) { %>
+        <div class="mt-8 max-w-xs" data-cart-button data-product-id="<%= product.id %>" data-initial-quantity="<%= (cartQuantities && cartQuantities[product.id]) || 0 %>"></div>
+      <% } else { %>
+        <p class="mt-8 text-caramel-dark font-semibold">Currently out of stock.</p>
+      <% } %>
+
+      <p class="text-xs text-cocoa-light mt-6">Available for kiosk pickup in Calabar or home delivery within our delivery zones.</p>
+    </div>
+  </div>
+</section>

@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= typeof title !== 'undefined' ? title : 'TEM Store' %></title>
+  <link rel="stylesheet" href="/css/output.css">
+</head>
+<body class="min-h-screen flex flex-col">
+  <%- include('partials/nav') %>
+  <main class="flex-1 relative">
+    <!-- Skeleton overlay: shown briefly on nav click so navigation feels
+         immediate on a slow connection. Shape matches the destination
+         page - a product grid looks nothing like a cart or a form. -->
+    <div id="skeleton-overlay" class="hidden absolute inset-0 z-40 bg-cream overflow-hidden">
+      <div class="max-w-7xl mx-auto px-5 sm:px-8 py-12">
+
+        <div data-variant="grid" class="hidden">
+          <div class="shimmer h-7 w-40 rounded-lg mb-8"></div>
+          <div class="grid grid-cols-2 lg:grid-cols-4 gap-5 sm:gap-6">
+            <% for (let i=0;i<8;i++) { %>
+              <div class="card">
+                <div class="shimmer aspect-square"></div>
+                <div class="p-4"><div class="shimmer h-4 w-3/4 rounded mb-2"></div><div class="shimmer h-4 w-1/3 rounded"></div></div>
+              </div>
+            <% } %>
+          </div>
+        </div>
+
+        <div data-variant="detail" class="hidden max-w-6xl mx-auto">
+          <div class="grid md:grid-cols-2 gap-10">
+            <div class="shimmer aspect-square rounded-2xl"></div>
+            <div>
+              <div class="shimmer h-4 w-24 rounded mb-3"></div>
+              <div class="shimmer h-8 w-3/4 rounded mb-4"></div>
+              <div class="shimmer h-6 w-32 rounded mb-6"></div>
+              <div class="shimmer h-4 w-full rounded mb-2"></div>
+              <div class="shimmer h-4 w-5/6 rounded mb-6"></div>
+              <div class="shimmer h-11 w-48 rounded-full"></div>
+            </div>
+          </div>
+        </div>
+
+        <div data-variant="cart" class="hidden max-w-4xl mx-auto">
+          <div class="shimmer h-8 w-32 rounded-lg mb-8"></div>
+          <div class="space-y-4">
+            <% for (let i=0;i<3;i++) { %>
+              <div class="card p-4 flex items-center gap-4">
+                <div class="shimmer w-20 h-20 rounded-xl flex-shrink-0"></div>
+                <div class="flex-1"><div class="shimmer h-4 w-1/2 rounded mb-2"></div><div class="shimmer h-3 w-1/4 rounded"></div></div>
+                <div class="shimmer h-4 w-16 rounded"></div>
+              </div>
+            <% } %>
+          </div>
+        </div>
+
+        <div data-variant="list" class="hidden max-w-4xl mx-auto">
+          <div class="shimmer h-8 w-40 rounded-lg mb-8"></div>
+          <div class="space-y-4">
+            <% for (let i=0;i<4;i++) { %>
+              <div class="card p-5 flex items-center justify-between">
+                <div><div class="shimmer h-4 w-32 rounded mb-2"></div><div class="shimmer h-3 w-24 rounded"></div></div>
+                <div class="shimmer h-6 w-20 rounded-full"></div>
+              </div>
+            <% } %>
+          </div>
+        </div>
+
+        <div data-variant="form" class="hidden max-w-md mx-auto">
+          <div class="shimmer h-8 w-40 rounded-lg mb-8"></div>
+          <div class="card p-6 space-y-4">
+            <% for (let i=0;i<4;i++) { %>
+              <div><div class="shimmer h-3 w-20 rounded mb-2"></div><div class="shimmer h-11 w-full rounded-xl"></div></div>
+            <% } %>
+            <div class="shimmer h-11 w-full rounded-full mt-2"></div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <%- body %>
+  </main>
+  <%- include('partials/footer') %>
+  <%- include('partials/bottom-nav') %>
+  <script>
+    // Same fixes applied to the admin panel's version, for consistency:
+    // a short delay before showing (so fast page loads never flash it),
+    // a safety timeout so it can never look permanently stuck, and a
+    // pageshow reset in case the browser Back button restores this page
+    // from cache with the overlay still up.
+    let skeletonShowTimer = null;
+    let skeletonSafetyTimer = null;
+
+    function showSkeleton(variant) {
+      const overlay = document.getElementById('skeleton-overlay');
+      if (!overlay) return;
+      clearTimeout(skeletonShowTimer);
+      skeletonShowTimer = setTimeout(() => {
+        overlay.querySelectorAll('[data-variant]').forEach((el) => el.classList.add('hidden'));
+        const match = overlay.querySelector('[data-variant="' + variant + '"]') || overlay.querySelector('[data-variant="grid"]');
+        match.classList.remove('hidden');
+        overlay.classList.remove('hidden');
+
+        clearTimeout(skeletonSafetyTimer);
+        skeletonSafetyTimer = setTimeout(() => {
+          let note = overlay.querySelector('#skeleton-slow-note');
+          if (!note) {
+            note = document.createElement('p');
+            note.id = 'skeleton-slow-note';
+            note.className = 'text-sm text-cocoa-light text-center mt-6';
+            note.textContent = 'This is taking longer than usual — check your connection.';
+            overlay.querySelector('.max-w-7xl').appendChild(note);
+          }
+        }, 10000);
+      }, 150);
+    }
+
+    function hideSkeleton() {
+      clearTimeout(skeletonShowTimer);
+      clearTimeout(skeletonSafetyTimer);
+      const overlay = document.getElementById('skeleton-overlay');
+      if (!overlay) return;
+      overlay.classList.add('hidden');
+      const note = overlay.querySelector('#skeleton-slow-note');
+      if (note) note.remove();
+    }
+
+    document.querySelectorAll('.skeleton-link').forEach((link) => {
+      link.addEventListener('click', function (e) {
+        if (e.metaKey || e.ctrlKey || e.shiftKey) return;
+        showSkeleton(this.dataset.skeleton || 'grid');
+      });
+    });
+
+    window.addEventListener('pageshow', hideSkeleton);
+
+    // Global button-spinner: every form submission on the site shows a
+    // spinner on its submit button and disables it, so clicking Log In,
+    // Place Order, Save, etc. always gives immediate feedback and can't
+    // be double-submitted by an impatient second click. Opt out on a
+    // specific form with data-no-spinner if it ever needs to skip this
+    // (e.g. a form that intentionally reloads instantly).
+    function startButtonSpinner(button) {
+      if (!button || button.dataset.spinning === 'true') return;
+      button.dataset.spinning = 'true';
+      button.dataset.originalHtml = button.innerHTML;
+      button.disabled = true;
+      button.innerHTML = '<span class="btn-spinner"></span><span>' + (button.dataset.loadingText || 'Please wait…') + '</span>';
+
+      // Safety net: if navigation never completes (dropped connection,
+      // server hang), restore the button after 10s instead of leaving it
+      // stuck disabled with no way to retry.
+      button.dataset.spinnerTimeout = setTimeout(() => resetButtonSpinner(button), 10000);
+    }
+
+    function resetButtonSpinner(button) {
+      if (!button || button.dataset.spinning !== 'true') return;
+      clearTimeout(button.dataset.spinnerTimeout);
+      button.disabled = false;
+      button.innerHTML = button.dataset.originalHtml;
+      delete button.dataset.spinning;
+    }
+
+    document.querySelectorAll('form:not([data-no-spinner])').forEach((form) => {
+      form.addEventListener('submit', function (e) {
+        const submitButton = form.querySelector('button[type="submit"], input[type="submit"]');
+        if (submitButton) startButtonSpinner(submitButton);
+      });
+    });
+
+    // A page restored from bfcache after Back is a page that never
+    // actually reloaded - reset any button left stuck mid-submit.
+    window.addEventListener('pageshow', () => {
+      document.querySelectorAll('[data-spinning="true"]').forEach(resetButtonSpinner);
+    });
+
+
+    // Hydrates every [data-cart-button] on the page into either an "Add to
+    // Cart" button or a quantity +/- stepper, based on what's already in
+    // the cart - and keeps it live as the person clicks, no page reload.
+    function renderCartButton(el, quantity) {
+      const productId = el.dataset.productId;
+      if (quantity > 0) {
+        el.innerHTML = `
+          <div class="flex items-center justify-between w-full bg-caramel/10 rounded-full px-1 py-1">
+            <button type="button" class="w-8 h-8 rounded-full bg-white text-cocoa font-bold flex items-center justify-center" onclick="cartStep('${productId}', -1)">&minus;</button>
+            <span class="font-semibold text-cocoa text-sm">${quantity}</span>
+            <button type="button" class="w-8 h-8 rounded-full bg-caramel text-cream font-bold flex items-center justify-center" onclick="cartStep('${productId}', 1)">+</button>
+          </div>`;
+      } else {
+        el.innerHTML = `<button type="button" class="w-full btn-primary !py-2 !px-4 text-sm" onclick="cartStep('${productId}', 1)">Add to Cart</button>`;
+      }
+    }
+
+    async function cartStep(productId, direction) {
+      const endpoint = direction > 0 ? '/cart/increment' : '/cart/decrement';
+      const res = await fetch(endpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: new URLSearchParams({ productId }),
+      });
+      const data = await res.json();
+      document.querySelectorAll(`[data-cart-button][data-product-id="${productId}"]`).forEach((el) => renderCartButton(el, data.quantity));
+      const badge = document.getElementById('cart-count-badge');
+      if (badge) {
+        if (data.itemCount > 0) { badge.textContent = data.itemCount; badge.classList.remove('hidden'); }
+        else { badge.classList.add('hidden'); }
+      }
+    }
+
+    document.querySelectorAll('[data-cart-button]').forEach((el) => {
+      renderCartButton(el, parseInt(el.dataset.initialQuantity || '0', 10));
+    });
+  </script>
+</body>
+</html>

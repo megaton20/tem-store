@@ -1,0 +1,19 @@
+<section class="max-w-6xl mx-auto px-5 sm:px-8 py-16">
+  <h1 class="text-4xl font-bold text-cocoa mb-3">Our Locations</h1>
+  <p class="text-cocoa-light mb-10">Pick up your order at any of these kiosks, or check back as we open in more states.</p>
+
+  <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+    <% branches.forEach(function(b) { %>
+      <div class="card p-6">
+        <span class="text-xs font-semibold uppercase tracking-wide text-forest"><%= b.city %>, <%= b.state %></span>
+        <h2 class="font-bold text-lg text-cocoa mt-1"><%= b.name %></h2>
+        <p class="text-sm text-cocoa-light mt-2"><%= b.address %></p>
+        <p class="text-sm text-cocoa-light mt-1">Open: <%= b.operatingHours %></p>
+        <% if (b.contactPhone) { %><p class="text-sm text-cocoa-light mt-1">Phone: <%= b.contactPhone %></p><% } %>
+      </div>
+    <% }); %>
+    <% if (!branches.length) { %>
+      <p class="text-cocoa-light col-span-full">No pickup locations listed yet — check back soon.</p>
+    <% } %>
+  </div>
+</section>

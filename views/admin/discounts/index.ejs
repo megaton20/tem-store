@@ -1,0 +1,55 @@
+<h1 class="text-2xl font-bold text-cocoa mb-6">Discount Codes</h1>
+
+<% if (errors && errors.length) { %>
+  <div class="bg-caramel-dark/10 border border-caramel-dark/30 text-caramel-dark rounded-xl px-4 py-3 mb-6 text-sm">
+    <ul class="list-disc list-inside"><% errors.forEach(function(e) { %><li><%= e %></li><% }); %></ul>
+  </div>
+<% } %>
+
+<div class="card p-6 mb-8">
+  <h2 class="font-bold text-cocoa mb-4">Create Code</h2>
+  <form action="/admin/discounts" method="POST" class="grid sm:grid-cols-2 gap-4">
+    <div><label class="block text-sm font-medium text-cocoa mb-2">Code</label><input type="text" name="code" required class="input-field uppercase" placeholder="LAUNCH10"></div>
+    <div>
+      <label class="block text-sm font-medium text-cocoa mb-2">Type</label>
+      <select name="type" class="input-field">
+        <option value="percent">Percent off</option>
+        <option value="flat">Flat amount off</option>
+      </select>
+    </div>
+    <div><label class="block text-sm font-medium text-cocoa mb-2">Value</label><input type="number" name="value" required class="input-field" placeholder="10 for 10% or a naira amount"></div>
+    <div><label class="block text-sm font-medium text-cocoa mb-2">Minimum Order Amount</label><input type="number" name="minOrderAmount" value="0" class="input-field"></div>
+    <div><label class="block text-sm font-medium text-cocoa mb-2">Max Uses (blank = unlimited)</label><input type="number" name="maxUses" class="input-field"></div>
+    <div><label class="block text-sm font-medium text-cocoa mb-2">Expires On (optional)</label><input type="date" name="expiresAt" class="input-field"></div>
+    <button type="submit" class="btn-primary sm:col-span-2">Create Code</button>
+  </form>
+</div>
+
+<div class="card overflow-x-auto">
+  <table class="w-full text-sm">
+    <thead class="bg-dough/40 text-cocoa-light text-left">
+      <tr><th class="px-4 py-3">Code</th><th class="px-4 py-3">Value</th><th class="px-4 py-3">Uses</th><th class="px-4 py-3">Expires</th><th class="px-4 py-3">Status</th><th class="px-4 py-3"></th></tr>
+    </thead>
+    <tbody>
+      <% codes.forEach(function(c) { %>
+        <tr class="border-t border-dough/60">
+          <td class="px-4 py-3 font-mono font-semibold text-cocoa"><%= c.code %></td>
+          <td class="px-4 py-3 text-cocoa-light"><%= c.type === 'percent' ? c.value + '%' : '₦' + Number(c.value).toLocaleString() %></td>
+          <td class="px-4 py-3 text-cocoa-light"><%= c.usesCount %><%= c.maxUses ? ' / ' + c.maxUses : '' %></td>
+          <td class="px-4 py-3 text-cocoa-light"><%= c.expiresAt ? new Date(c.expiresAt).toLocaleDateString() : 'Never' %></td>
+          <td class="px-4 py-3">
+            <span class="text-xs font-semibold px-2 py-1 rounded-full <%= c.isActive ? 'bg-forest/10 text-forest' : 'bg-caramel-dark/10 text-caramel-dark' %>"><%= c.isActive ? 'Active' : 'Inactive' %></span>
+          </td>
+          <td class="px-4 py-3">
+            <form action="/admin/discounts/<%= c.id %>/toggle" method="POST">
+              <button type="submit" class="btn-secondary !py-1 !px-3 text-xs"><%= c.isActive ? 'Deactivate' : 'Activate' %></button>
+            </form>
+          </td>
+        </tr>
+      <% }); %>
+      <% if (!codes.length) { %>
+        <tr><td colspan="6" class="px-4 py-8 text-center text-cocoa-light">No discount codes yet.</td></tr>
+      <% } %>
+    </tbody>
+  </table>
+</div>

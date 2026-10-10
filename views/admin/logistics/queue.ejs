@@ -1,0 +1,44 @@
+<h1 class="text-2xl font-bold text-cocoa mb-1">Dispatch Queue</h1>
+<p class="text-sm text-cocoa-light mb-4">Every shipment waiting for a rider or currently moving, across all branches.</p>
+<a href="/admin/logistics/book" class="btn-primary inline-flex mb-6 !py-2 text-sm">+ Book Walk-in Delivery</a>
+
+<% if (!shipments.length) { %>
+  <div class="card p-10 text-center text-cocoa-light">Nothing waiting for dispatch right now.</div>
+<% } else { %>
+  <div class="space-y-4">
+    <% shipments.forEach(function(s) { %>
+      <div class="card p-5">
+        <div class="flex items-start justify-between gap-4 mb-3">
+          <div>
+            <p class="font-semibold text-cocoa"><%= s.recipientName %> <span class="text-cocoa-light font-normal">&middot; <%= s.recipientPhone %></span></p>
+            <p class="text-xs text-cocoa-light mt-1"><%= s.deliveryAddress %>, <%= s.deliveryCity %>, <%= s.deliveryState %></p>
+            <p class="text-xs text-cocoa-light mt-1">From: <span class="font-medium"><%= s.pickupBranch ? s.pickupBranch.name : '—' %></span></p>
+            <% if (s.source === 'external') { %>
+              <p class="text-xs text-forest font-medium mt-1">Walk-in courier &middot; &#8358;<%= Number(s.fee).toLocaleString() %> &middot; <%= s.paymentStatus %></p>
+            <% } %>
+          </div>
+          <span class="text-xs font-semibold uppercase px-2 py-1 rounded-full whitespace-nowrap <%= s.status === 'awaiting_dispatch' ? 'bg-caramel/10 text-caramel-dark' : s.status === 'out_for_delivery' ? 'bg-forest/10 text-forest' : 'bg-dough text-cocoa-light' %>"><%= s.status.replace(/_/g, ' ') %></span>
+        </div>
+
+        <div class="bg-dough/30 rounded-lg p-3 mb-3">
+          <p class="text-xs font-semibold uppercase text-cocoa-light mb-1">Carrying</p>
+          <p class="text-sm text-cocoa"><%= s.manifest %></p>
+        </div>
+
+        <% if (s.status !== 'out_for_delivery') { %>
+          <form action="/admin/logistics/shipments/<%= s.id %>/assign" method="POST" class="flex items-center gap-2">
+            <select name="riderId" required class="input-field !py-2 flex-1">
+              <option value="">Select a rider</option>
+              <% riders.forEach(function(r) { %>
+                <option value="<%= r.id %>" <%= s.assignedRiderId === r.id ? 'selected' : '' %>><%= r.fullName %> <%= r.branch ? '— ' + r.branch.name : '' %></option>
+              <% }); %>
+            </select>
+            <button type="submit" class="btn-primary !py-2 !px-4 text-sm"><%= s.rider ? 'Reassign' : 'Assign' %></button>
+          </form>
+        <% } else { %>
+          <p class="text-sm text-cocoa-light">Out for delivery with <span class="font-medium text-cocoa"><%= s.rider ? s.rider.fullName : '—' %></span></p>
+        <% } %>
+      </div>
+    <% }); %>
+  </div>
+<% } %>

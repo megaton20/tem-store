@@ -1,0 +1,183 @@
+<h1 class="text-2xl font-bold text-cocoa mb-1">POS Terminal</h1>
+<p class="text-sm text-cocoa-light mb-6">Selling from: <span class="font-semibold text-cocoa"><%= branch.name %></span></p>
+
+<div class="grid lg:grid-cols-3 gap-6">
+  <div class="lg:col-span-2 space-y-8">
+    <% Object.keys(grouped).forEach(function(catName) { %>
+      <div>
+        <h2 class="text-sm font-semibold uppercase tracking-wide text-cocoa-light mb-3"><%= catName %></h2>
+        <div class="grid grid-cols-2 sm:grid-cols-3 gap-4">
+          <% grouped[catName].forEach(function(row) { %>
+            <button type="button"
+              class="card p-3 text-left hover:shadow-md transition-shadow disabled:opacity-40 disabled:cursor-not-allowed"
+              data-id="<%= row.Product.id %>"
+              data-name="<%= row.Product.name %>"
+              data-price="<%= row.Product.price %>"
+              data-stock="<%= row.quantity %>"
+              onclick="addToPosCart(this)"
+              <%= row.quantity <= 0 ? 'disabled' : '' %>>
+              <div class="aspect-square bg-dough/40 rounded-lg overflow-hidden mb-2">
+                <img src="<%= row.Product.imageUrl %>" alt="<%= row.Product.name %>" class="w-full h-full object-contain p-3" onerror="this.src='https://via.placeholder.com/200/EFE0C8/3A2317?text=TEM'">
+              </div>
+              <p class="font-semibold text-cocoa text-sm"><%= row.Product.name %></p>
+              <p class="text-caramel font-bold mt-1">&#8358;<%= Number(row.Product.price).toLocaleString() %></p>
+              <p class="text-xs text-cocoa-light mt-1"><%= row.quantity %> in stock</p>
+            </button>
+          <% }); %>
+        </div>
+      </div>
+    <% }); %>
+    <% if (!Object.keys(grouped).length) { %>
+      <p class="text-cocoa-light">No stock recorded at this branch yet — receive a transfer first.</p>
+    <% } %>
+  </div>
+
+  <div class="card p-6 h-fit sticky top-6">
+    <h2 class="font-bold text-cocoa mb-4">Current Sale</h2>
+    <div id="pos-cart" class="space-y-2 min-h-[80px]">
+      <p class="text-sm text-cocoa-light" id="pos-empty-msg">No items yet — tap a product.</p>
+    </div>
+
+    <div class="border-t border-dough mt-4 pt-4 flex justify-between font-bold text-cocoa">
+      <span>Total</span><span id="pos-total">&#8358;0</span>
+    </div>
+
+    <div class="mt-4 space-y-3">
+      <div>
+        <label class="block text-xs font-medium text-cocoa mb-1">Payment Method</label>
+        <select id="pos-payment-method" class="input-field !py-2">
+          <option value="cash">Cash</option>
+          <option value="pos_card">Card (POS machine)</option>
+          <option value="pos_transfer">Bank Transfer</option>
+        </select>
+      </div>
+      <div>
+        <label class="block text-xs font-medium text-cocoa mb-1">Customer Name (optional)</label>
+        <input type="text" id="pos-customer-name" class="input-field !py-2">
+      </div>
+      <div>
+        <label class="block text-xs font-medium text-cocoa mb-1">Customer Phone (optional)</label>
+        <input type="text" id="pos-customer-phone" class="input-field !py-2">
+      </div>
+    </div>
+
+    <button type="button" onclick="submitPosSale()" class="btn-primary w-full mt-4">Complete Sale</button>
+    <p id="pos-error" class="text-xs text-caramel-dark mt-2"></p>
+  </div>
+</div>
+
+<div class="max-w-sm mt-6">
+  <div class="card p-6">
+    <h2 class="font-bold text-cocoa mb-1">Redeem a Loyalty Reward</h2>
+    <p class="text-xs text-cocoa-light mb-3">Enter the code from the customer's profile page.</p>
+    <div class="flex gap-2">
+      <input type="text" id="loyalty-code" class="input-field !py-2 flex-1 uppercase" placeholder="LOY-XXXX-XXXX-XXXX">
+      <button type="button" onclick="redeemLoyalty()" class="btn-secondary !py-2 text-sm">Redeem</button>
+    </div>
+    <p id="loyalty-result" class="text-xs mt-2"></p>
+  </div>
+</div>
+
+<script>
+  const posCart = new Map(); // productId -> {name, price, quantity, maxStock}
+
+  function renderPosCart() {
+    const cartEl = document.getElementById('pos-cart');
+    const emptyMsg = document.getElementById('pos-empty-msg');
+    cartEl.innerHTML = '';
+    let total = 0;
+
+    if (posCart.size === 0) {
+      cartEl.appendChild(emptyMsg);
+    } else {
+      posCart.forEach((item, id) => {
+        total += item.price * item.quantity;
+        const row = document.createElement('div');
+        row.className = 'flex items-center justify-between text-sm';
+        row.innerHTML = `
+          <span class="text-cocoa-light">${item.name} &times; ${item.quantity}</span>
+          <div class="flex items-center gap-2">
+            <span class="text-cocoa font-medium">₦${(item.price * item.quantity).toLocaleString()}</span>
+            <button type="button" class="text-cocoa-light hover:text-caramel-dark" onclick="removeFromPosCart('${id}')">&times;</button>
+          </div>`;
+        cartEl.appendChild(row);
+      });
+    }
+    document.getElementById('pos-total').textContent = '₦' + total.toLocaleString();
+  }
+
+  function addToPosCart(btn) {
+    const id = btn.dataset.id;
+    const existing = posCart.get(id);
+    const maxStock = parseInt(btn.dataset.stock, 10);
+    const currentQty = existing ? existing.quantity : 0;
+
+    if (currentQty + 1 > maxStock) {
+      document.getElementById('pos-error').textContent = `Only ${maxStock} in stock for ${btn.dataset.name}.`;
+      return;
+    }
+    document.getElementById('pos-error').textContent = '';
+
+    if (existing) {
+      existing.quantity += 1;
+    } else {
+      posCart.set(id, { name: btn.dataset.name, price: parseFloat(btn.dataset.price), quantity: 1, maxStock });
+    }
+    renderPosCart();
+  }
+
+  function removeFromPosCart(id) {
+    posCart.delete(id);
+    renderPosCart();
+  }
+
+  async function submitPosSale() {
+    if (posCart.size === 0) return;
+    const items = Array.from(posCart.entries()).map(([productId, item]) => ({ productId, quantity: item.quantity }));
+
+    const body = new URLSearchParams();
+    body.set('items', JSON.stringify(items));
+    body.set('paymentMethod', document.getElementById('pos-payment-method').value);
+    body.set('customerName', document.getElementById('pos-customer-name').value);
+    body.set('customerPhone', document.getElementById('pos-customer-phone').value);
+
+    const res = await fetch('/admin/pos/sale', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body,
+    });
+    const data = await res.json();
+
+    if (!res.ok) {
+      document.getElementById('pos-error').textContent = data.error || 'Something went wrong.';
+      return;
+    }
+
+    window.location = '/admin/pos/receipt/' + data.orderId;
+  }
+
+  async function redeemLoyalty() {
+    const code = document.getElementById('loyalty-code').value.trim();
+    const resultEl = document.getElementById('loyalty-result');
+    if (!code) return;
+
+    const body = new URLSearchParams();
+    body.set('code', code);
+
+    const res = await fetch('/admin/pos/redeem-loyalty', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body,
+    });
+    const data = await res.json();
+
+    if (!res.ok) {
+      resultEl.textContent = data.error || 'Something went wrong.';
+      resultEl.className = 'text-xs mt-2 text-caramel-dark';
+      return;
+    }
+    resultEl.textContent = 'Reward redeemed — give the customer their item.';
+    resultEl.className = 'text-xs mt-2 text-forest font-medium';
+    document.getElementById('loyalty-code').value = '';
+  }
+</script>

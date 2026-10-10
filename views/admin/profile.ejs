@@ -1,0 +1,63 @@
+<h1 class="text-2xl font-bold text-cocoa mb-6">My Profile</h1>
+
+<% if (errors && errors.length) { %>
+  <div class="bg-caramel-dark/10 border border-caramel-dark/30 text-caramel-dark rounded-xl px-4 py-3 mb-6 text-sm">
+    <ul class="list-disc list-inside"><% errors.forEach(function(e) { %><li><%= e %></li><% }); %></ul>
+  </div>
+<% } %>
+<% if (success) { %>
+  <div class="bg-forest/10 border border-forest/30 text-forest rounded-xl px-4 py-3 mb-6 text-sm"><%= success %></div>
+<% } %>
+
+<div class="grid lg:grid-cols-3 gap-6 max-w-3xl" data-skeleton="form">
+  <div class="lg:col-span-2 space-y-6">
+    <div class="card p-6">
+      <h2 class="font-bold text-cocoa mb-4">Account Details</h2>
+      <form action="/admin/profile" method="POST" class="space-y-4">
+        <div>
+          <label class="block text-sm font-medium text-cocoa mb-2">Full Name</label>
+          <input type="text" name="fullName" value="<%= profileUser.fullName %>" required class="input-field">
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-cocoa mb-2">Email</label>
+          <input type="email" value="<%= profileUser.email %>" disabled class="input-field opacity-60">
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-cocoa mb-2">Phone</label>
+          <input type="text" name="phone" value="<%= profileUser.phone %>" required class="input-field">
+        </div>
+        <button type="submit" class="btn-primary w-full">Save Changes</button>
+      </form>
+    </div>
+
+    <div class="card p-6">
+      <h2 class="font-bold text-cocoa mb-4">Change Password</h2>
+      <form action="/admin/profile/password" method="POST" class="space-y-4">
+        <div>
+          <label class="block text-sm font-medium text-cocoa mb-2">Current Password</label>
+          <input type="password" name="currentPassword" required class="input-field">
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-cocoa mb-2">New Password</label>
+          <input type="password" name="newPassword" required class="input-field">
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-cocoa mb-2">Confirm New Password</label>
+          <input type="password" name="confirmPassword" required class="input-field">
+        </div>
+        <button type="submit" class="btn-secondary w-full">Change Password</button>
+      </form>
+    </div>
+  </div>
+
+  <div class="card p-6 h-fit">
+    <h2 class="font-bold text-cocoa mb-4">Role Info</h2>
+    <p class="text-sm text-cocoa-light">Role</p>
+    <p class="font-semibold text-cocoa capitalize mb-3"><%= profileUser.role.replace(/_/g, ' ') %></p>
+    <% if (profileUser.branch) { %>
+      <p class="text-sm text-cocoa-light">Branch</p>
+      <p class="font-semibold text-cocoa mb-3"><%= profileUser.branch.name %></p>
+    <% } %>
+    <a href="/admin/docs/<%= profileUser.role %>" class="text-caramel font-semibold text-sm">Read your Role Guide &rarr;</a>
+  </div>
+</div>

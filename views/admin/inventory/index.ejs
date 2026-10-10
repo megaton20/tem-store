@@ -1,0 +1,81 @@
+<div class="flex items-center justify-between mb-6">
+  <h1 class="text-2xl font-bold text-cocoa">Inventory</h1>
+  <% if (!scopedToOwnBranch) { %>
+    <form method="GET" class="flex gap-2">
+      <select name="branchId" onchange="this.form.submit()" class="input-field !py-2 !w-56">
+        <option value="">Select a branch to manage</option>
+        <% branches.forEach(function(b) { %>
+          <option value="<%= b.id %>" <%= filterBranchId === b.id ? 'selected' : '' %>><%= b.name %></option>
+        <% }); %>
+      </select>
+    </form>
+  <% } %>
+</div>
+
+<% if (filterBranchId && unstockedProducts.length) { %>
+  <div class="card p-6 mb-8">
+    <h2 class="font-bold text-cocoa mb-4">Add Product to This Branch's Inventory</h2>
+    <p class="text-sm text-cocoa-light mb-4">These products exist in the catalog but have never been stocked at this branch yet.</p>
+    <form action="/admin/inventory/add" method="POST" class="flex flex-wrap items-end gap-3">
+      <input type="hidden" name="branchId" value="<%= filterBranchId %>">
+      <div>
+        <label class="block text-sm font-medium text-cocoa mb-2">Product</label>
+        <select name="productId" required class="input-field !w-64">
+          <% unstockedProducts.forEach(function(p) { %><option value="<%= p.id %>"><%= p.name %></option><% }); %>
+        </select>
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-cocoa mb-2">Starting Quantity</label>
+        <input type="number" name="quantity" min="1" required class="input-field !w-32">
+      </div>
+      <button type="submit" class="btn-primary">Add to Inventory</button>
+    </form>
+  </div>
+<% } else if (!filterBranchId && !scopedToOwnBranch) { %>
+  <div class="card p-8 text-center text-cocoa-light mb-8">Select a branch above to view and manage its inventory, including adding new products.</div>
+<% } %>
+
+<% if (filterBranchId || scopedToOwnBranch) { %>
+  <% const categoryNames = Object.keys(grouped); %>
+  <% if (!categoryNames.length) { %>
+    <div class="card p-10 text-center text-cocoa-light">No inventory records yet for this branch — add a product above to get started.</div>
+  <% } else { %>
+    <% categoryNames.forEach(function(catName) { %>
+      <div class="mb-8">
+        <h2 class="text-sm font-semibold uppercase tracking-wide text-cocoa-light mb-3"><%= catName %></h2>
+        <div class="card overflow-x-auto">
+          <table class="w-full text-sm">
+            <thead class="bg-dough/40 text-cocoa-light text-left">
+              <tr>
+                <th class="px-4 py-3">Product</th>
+                <% if (!scopedToOwnBranch) { %><th class="px-4 py-3">Branch</th><% } %>
+                <th class="px-4 py-3">Quantity</th>
+                <th class="px-4 py-3">Low Stock Threshold</th>
+                <th class="px-4 py-3">Adjust</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% grouped[catName].forEach(function(row) { %>
+                <tr class="border-t border-dough/60 <%= row.quantity <= row.lowStockThreshold ? 'bg-caramel/5' : '' %>">
+                  <td class="px-4 py-3 font-medium text-cocoa"><%= row.Product ? row.Product.name : '—' %></td>
+                  <% if (!scopedToOwnBranch) { %><td class="px-4 py-3 text-cocoa-light"><%= row.Branch ? row.Branch.name : '—' %></td><% } %>
+                  <td class="px-4 py-3 font-semibold <%= row.quantity <= row.lowStockThreshold ? 'text-caramel-dark' : 'text-cocoa' %>"><%= row.quantity %></td>
+                  <td class="px-4 py-3 text-cocoa-light"><%= row.lowStockThreshold %></td>
+                  <td class="px-4 py-3">
+                    <form action="/admin/inventory/adjust" method="POST" class="flex items-center gap-2">
+                      <input type="hidden" name="productId" value="<%= row.productId %>">
+                      <input type="hidden" name="branchId" value="<%= row.branchId %>">
+                      <input type="number" name="delta" placeholder="+/-" class="input-field !py-1.5 !w-24 text-center" required>
+                      <button type="submit" class="btn-secondary !py-1.5 !px-3 text-xs">Apply</button>
+                    </form>
+                  </td>
+                </tr>
+              <% }); %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    <% }); %>
+  <% } %>
+<% } %>
+<p class="text-xs text-cocoa-light mt-3">Positive numbers add stock, negative numbers remove it. Every change here is logged with your name and timestamp.</p>

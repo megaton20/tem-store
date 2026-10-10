@@ -1,0 +1,30 @@
+<% if (typeof currentUser !== 'undefined' && currentUser && currentUser.role === 'customer') { %>
+<nav class="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-cream/95 backdrop-blur border-t border-dough safe-bottom">
+  <div class="grid grid-cols-5 text-[11px] text-cocoa-light">
+    <a href="/" class="flex flex-col items-center gap-1 py-2.5">
+      <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 12l9-9 9 9M4 10v10a1 1 0 001 1h4v-6h6v6h4a1 1 0 001-1V10"/></svg>
+      Home
+    </a>
+    <a href="/shop" class="flex flex-col items-center gap-1 py-2.5">
+      <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 3h2l.4 2M7 13h10l3.6-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
+      Shop
+    </a>
+    <a href="/cart" class="flex flex-col items-center gap-1 py-2.5 relative">
+      <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 11H4L5 9z"/></svg>
+      <% if (typeof cartItemCount !== 'undefined' && cartItemCount > 0) { %>
+        <span class="absolute top-1 right-6 bg-caramel text-cream text-[9px] font-bold w-4 h-4 rounded-full flex items-center justify-center"><%= cartItemCount %></span>
+      <% } %>
+      Cart
+    </a>
+    <a href="/orders" class="flex flex-col items-center gap-1 py-2.5">
+      <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+      Orders
+    </a>
+    <a href="/profile" class="flex flex-col items-center gap-1 py-2.5">
+      <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+      Profile
+    </a>
+  </div>
+</nav>
+<div class="md:hidden h-16"></div>
+<% } %>

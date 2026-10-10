@@ -1,0 +1,40 @@
+<section class="max-w-lg mx-auto px-5 sm:px-8 py-16">
+  <span class="inline-flex items-center gap-2 bg-forest/10 text-forest text-xs font-semibold uppercase tracking-wide px-3 py-1.5 rounded-full">
+    Authenticity Check
+  </span>
+  <h1 class="text-3xl font-bold text-cocoa mt-4 mb-2">Verify Your Product</h1>
+  <p class="text-cocoa-light mb-8">Every genuine TEM Store product carries a unique code on its packaging. Enter it below to confirm it's authentic — each code can only be verified once.</p>
+
+  <% if (result) { %>
+    <% if (result.type === 'genuine') { %>
+      <div class="bg-forest/10 border border-forest/30 rounded-2xl p-6 mb-8">
+        <p class="text-forest font-bold text-lg">✓ Genuine TEM Store Product</p>
+        <p class="text-cocoa mt-2"><span class="font-semibold"><%= result.product.name %></span></p>
+        <p class="text-sm text-cocoa-light mt-1">Batch <%= result.batch.batchNumber %> &middot; produced <%= new Date(result.batch.producedAt).toLocaleDateString() %></p>
+        <p class="text-xs text-cocoa-light mt-4">This code has now been marked as used and cannot be verified again.</p>
+      </div>
+    <% } else if (result.type === 'already_used') { %>
+      <div class="bg-caramel/10 border border-caramel/30 rounded-2xl p-6 mb-8">
+        <p class="text-caramel-dark font-bold text-lg">This code was already verified</p>
+        <p class="text-cocoa mt-2"><span class="font-semibold"><%= result.product.name %></span> &middot; Batch <%= result.batch.batchNumber %></p>
+        <p class="text-sm text-cocoa-light mt-1">First verified on <%= new Date(result.verifiedAt).toLocaleString() %>.</p>
+        <p class="text-xs text-cocoa-light mt-4">If you're seeing this on a product you just opened for the first time, please contact us — it may indicate a counterfeit.</p>
+      </div>
+    <% } else { %>
+      <div class="bg-caramel-dark/10 border border-caramel-dark/30 rounded-2xl p-6 mb-8">
+        <p class="text-caramel-dark font-bold text-lg">Code not recognized</p>
+        <p class="text-sm text-cocoa-light mt-2">We couldn't find "<%= submittedCode %>" in our records. Double-check the code on your packaging, or contact us if you believe this is a genuine TEM Store product.</p>
+      </div>
+    <% } %>
+  <% } %>
+
+  <form action="/verify" method="POST" class="space-y-4">
+    <div>
+      <label class="block text-sm font-medium text-cocoa mb-2">Verification Code</label>
+      <input type="text" name="code" required class="input-field uppercase tracking-widest" placeholder="TEM-XXXX-XXXX-XXXX" value="<%= submittedCode || '' %>">
+    </div>
+    <button type="submit" class="btn-primary w-full">Verify</button>
+  </form>
+
+  <p class="text-xs text-cocoa-light mt-6">Questions about a code? <a href="/contact" class="text-caramel font-medium">Contact us</a>.</p>
+</section>

@@ -1,0 +1,73 @@
+<h1 class="text-2xl font-bold text-cocoa mb-6">Branches</h1>
+
+<% if (errors && errors.length) { %>
+  <div class="bg-caramel-dark/10 border border-caramel-dark/30 text-caramel-dark rounded-xl px-4 py-3 mb-6 text-sm">
+    <ul class="list-disc list-inside"><% errors.forEach(function(e) { %><li><%= e %></li><% }); %></ul>
+  </div>
+<% } %>
+
+<div class="card p-6 mb-8">
+  <h2 class="font-bold text-cocoa mb-4">Add Branch</h2>
+  <form action="/admin/branches" method="POST" class="grid sm:grid-cols-2 gap-4">
+    <div><label class="block text-sm font-medium text-cocoa mb-2">Name</label><input type="text" name="name" required class="input-field" placeholder="e.g. TEM Kiosk — Ikom"></div>
+    <div>
+      <label class="block text-sm font-medium text-cocoa mb-2">Type</label>
+      <select name="type" class="input-field">
+        <option value="kiosk">Kiosk (pickup + POS)</option>
+        <option value="warehouse">Warehouse (stock holding only)</option>
+        <option value="production">Production Site</option>
+      </select>
+    </div>
+    <div class="sm:col-span-2"><label class="block text-sm font-medium text-cocoa mb-2">Address</label><input type="text" name="address" required class="input-field"></div>
+    <div><label class="block text-sm font-medium text-cocoa mb-2">City</label><input type="text" name="city" required class="input-field"></div>
+    <div><label class="block text-sm font-medium text-cocoa mb-2">State</label><input type="text" name="state" required class="input-field" value="Cross River"></div>
+    <div><label class="block text-sm font-medium text-cocoa mb-2">Contact Phone</label><input type="text" name="contactPhone" class="input-field"></div>
+    <div><label class="block text-sm font-medium text-cocoa mb-2">Pickup Fee</label><input type="number" name="pickupFee" value="0" class="input-field"></div>
+    <button type="submit" class="btn-primary sm:col-span-2">Add Branch</button>
+  </form>
+</div>
+
+<div class="space-y-3">
+  <% branches.forEach(function(b) { %>
+    <div class="card p-5">
+      <div class="flex items-center justify-between gap-4">
+        <div>
+          <p class="font-semibold text-cocoa"><%= b.name %> <span class="text-cocoa-light font-normal text-xs capitalize">(<%= b.type %>)</span></p>
+          <p class="text-xs text-cocoa-light mt-1"><%= b.address %>, <%= b.city %>, <%= b.state %></p>
+        </div>
+        <div class="flex items-center gap-2 flex-shrink-0">
+          <span class="text-xs font-semibold px-2 py-1 rounded-full <%= b.isActive ? 'bg-forest/10 text-forest' : 'bg-caramel-dark/10 text-caramel-dark' %>"><%= b.isActive ? 'Active' : 'Inactive' %></span>
+          <button type="button" onclick="document.getElementById('edit-branch-<%= b.id %>').classList.toggle('hidden')" class="btn-secondary !py-1 !px-3 text-xs">Edit</button>
+          <form action="/admin/branches/<%= b.id %>/toggle" method="POST">
+            <button type="submit" class="btn-secondary !py-1 !px-3 text-xs"><%= b.isActive ? 'Deactivate' : 'Activate' %></button>
+          </form>
+        </div>
+      </div>
+
+      <div id="edit-branch-<%= b.id %>" class="hidden mt-4 pt-4 border-t border-dough">
+        <form action="/admin/branches/<%= b.id %>" method="POST" class="grid sm:grid-cols-2 gap-3">
+          <div><label class="block text-xs font-medium text-cocoa mb-1">Name</label><input type="text" name="name" value="<%= b.name %>" class="input-field !py-2 text-sm"></div>
+          <div>
+            <label class="block text-xs font-medium text-cocoa mb-1">Type</label>
+            <select name="type" class="input-field !py-2 text-sm">
+              <option value="kiosk" <%= b.type === 'kiosk' ? 'selected' : '' %>>Kiosk</option>
+              <option value="warehouse" <%= b.type === 'warehouse' ? 'selected' : '' %>>Warehouse</option>
+              <option value="production" <%= b.type === 'production' ? 'selected' : '' %>>Production Site</option>
+            </select>
+          </div>
+          <div class="sm:col-span-2"><label class="block text-xs font-medium text-cocoa mb-1">Address</label><input type="text" name="address" value="<%= b.address %>" class="input-field !py-2 text-sm"></div>
+          <div><label class="block text-xs font-medium text-cocoa mb-1">City</label><input type="text" name="city" value="<%= b.city %>" class="input-field !py-2 text-sm"></div>
+          <div><label class="block text-xs font-medium text-cocoa mb-1">State</label><input type="text" name="state" value="<%= b.state %>" class="input-field !py-2 text-sm"></div>
+          <div><label class="block text-xs font-medium text-cocoa mb-1">Contact Phone</label><input type="text" name="contactPhone" value="<%= b.contactPhone || '' %>" class="input-field !py-2 text-sm"></div>
+          <div><label class="block text-xs font-medium text-cocoa mb-1">Pickup Fee</label><input type="number" name="pickupFee" value="<%= b.pickupFee %>" class="input-field !py-2 text-sm"></div>
+          <div class="sm:col-span-2"><label class="block text-xs font-medium text-cocoa mb-1">Operating Hours</label><input type="text" name="operatingHours" value="<%= b.operatingHours %>" class="input-field !py-2 text-sm"></div>
+          <div class="sm:col-span-2 flex items-center gap-4">
+            <label class="flex items-center gap-2 text-xs text-cocoa"><input type="checkbox" name="isPickupEnabled" <%= b.isPickupEnabled ? 'checked' : '' %>> Allow customer pickup here</label>
+            <label class="flex items-center gap-2 text-xs text-cocoa"><input type="checkbox" name="isFulfillmentEnabled" <%= b.isFulfillmentEnabled ? 'checked' : '' %>> Eligible for delivery fulfillment</label>
+          </div>
+          <button type="submit" class="btn-primary sm:col-span-2 !py-2 text-sm">Save Changes</button>
+        </form>
+      </div>
+    </div>
+  <% }); %>
+</div>

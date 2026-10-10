@@ -1,0 +1,50 @@
+<h1 class="text-2xl font-bold text-cocoa mb-1">Operating Locations</h1>
+<p class="text-sm text-cocoa-light mb-6">Cities TEM Store operates in. This is exactly what customers see as choices when they register or update their profile — anywhere not listed here shows as "Other" with an expansion message, instead of letting them type in anything.</p>
+
+<% if (errors && errors.length) { %>
+  <div class="bg-caramel-dark/10 border border-caramel-dark/30 text-caramel-dark rounded-xl px-4 py-3 mb-6 text-sm">
+    <ul class="list-disc list-inside"><% errors.forEach(function(e) { %><li><%= e %></li><% }); %></ul>
+  </div>
+<% } %>
+
+<div class="card p-6 mb-8">
+  <h2 class="font-bold text-cocoa mb-4">Add a City</h2>
+  <form action="/admin/operating-locations" method="POST" class="grid sm:grid-cols-2 gap-4">
+    <div><label class="block text-sm font-medium text-cocoa mb-2">State</label><input type="text" name="state" required class="input-field" placeholder="e.g. Cross River"></div>
+    <div><label class="block text-sm font-medium text-cocoa mb-2">City</label><input type="text" name="city" required class="input-field" placeholder="e.g. Calabar Municipal"></div>
+    <button type="submit" class="btn-primary sm:col-span-2">Add City</button>
+  </form>
+</div>
+
+<% const byState = {}; locations.forEach(function(l) { if (!byState[l.state]) byState[l.state] = []; byState[l.state].push(l); }); %>
+
+<% Object.keys(byState).forEach(function(state) { %>
+  <div class="mb-8">
+    <h2 class="text-sm font-semibold uppercase tracking-wide text-cocoa-light mb-3"><%= state %></h2>
+    <div class="card overflow-x-auto">
+      <table class="w-full text-sm">
+        <thead class="bg-dough/40 text-cocoa-light text-left">
+          <tr><th class="px-4 py-3">City</th><th class="px-4 py-3">Status</th><th class="px-4 py-3"></th></tr>
+        </thead>
+        <tbody>
+          <% byState[state].forEach(function(l) { %>
+            <tr class="border-t border-dough/60">
+              <td class="px-4 py-3 font-medium text-cocoa"><%= l.city %></td>
+              <td class="px-4 py-3">
+                <span class="text-xs font-semibold px-2 py-1 rounded-full <%= l.isActive ? 'bg-forest/10 text-forest' : 'bg-caramel-dark/10 text-caramel-dark' %>"><%= l.isActive ? 'Active' : 'Inactive' %></span>
+              </td>
+              <td class="px-4 py-3">
+                <form action="/admin/operating-locations/<%= l.id %>/toggle" method="POST">
+                  <button type="submit" class="btn-secondary !py-1 !px-3 text-xs"><%= l.isActive ? 'Deactivate' : 'Activate' %></button>
+                </form>
+              </td>
+            </tr>
+          <% }); %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+<% }); %>
+<% if (!Object.keys(byState).length) { %>
+  <div class="card p-10 text-center text-cocoa-light">No operating locations yet — add your first city above.</div>
+<% } %>

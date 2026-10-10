@@ -1,0 +1,132 @@
+<div class="flex items-center justify-between mb-6">
+  <h1 class="text-2xl font-bold text-cocoa">Products</h1>
+  <button type="button" onclick="openProductModal()" class="btn-primary !py-2 text-sm">+ Add Product</button>
+</div>
+
+<% if (errors && errors.length) { %>
+  <div class="bg-caramel-dark/10 border border-caramel-dark/30 text-caramel-dark rounded-xl px-4 py-3 mb-6 text-sm">
+    <ul class="list-disc list-inside"><% errors.forEach(function(e) { %><li><%= e %></li><% }); %></ul>
+  </div>
+<% } %>
+
+<div class="card overflow-x-auto">
+  <table class="w-full text-sm">
+    <thead class="bg-dough/40 text-cocoa-light text-left">
+      <tr><th class="px-4 py-3">Product</th><th class="px-4 py-3">Category</th><th class="px-4 py-3">Price</th><th class="px-4 py-3">Sourcing</th><th class="px-4 py-3">Status</th><th class="px-4 py-3"></th></tr>
+    </thead>
+    <tbody>
+      <% products.forEach(function(p) { %>
+        <tr class="border-t border-dough/60">
+          <td class="px-4 py-3 font-medium text-cocoa"><%= p.name %></td>
+          <td class="px-4 py-3 text-cocoa-light"><%= p.Category ? p.Category.name : '—' %></td>
+          <td class="px-4 py-3 text-cocoa-light">&#8358;<%= Number(p.price).toLocaleString() %></td>
+          <td class="px-4 py-3 text-cocoa-light"><%= p.fulfillmentType === 'third_party' ? `Third-party (${p.leadTimeDays}d)` : 'In-house' %></td>
+          <td class="px-4 py-3">
+            <span class="text-xs font-semibold px-2 py-1 rounded-full <%= p.isActive ? 'bg-forest/10 text-forest' : 'bg-caramel-dark/10 text-caramel-dark' %>"><%= p.isActive ? 'Active' : 'Inactive' %></span>
+          </td>
+          <td class="px-4 py-3">
+            <form action="/admin/products/<%= p.id %>/toggle" method="POST">
+              <button type="submit" class="btn-secondary !py-1 !px-3 text-xs"><%= p.isActive ? 'Deactivate' : 'Activate' %></button>
+            </form>
+          </td>
+        </tr>
+      <% }); %>
+      <% if (!products.length) { %>
+        <tr><td colspan="6" class="px-4 py-8 text-center text-cocoa-light">No products yet — add your first one.</td></tr>
+      <% } %>
+    </tbody>
+  </table>
+</div>
+
+<!-- Add Product Modal -->
+<div id="product-modal" class="fixed inset-0 z-50 hidden items-center justify-center p-4" style="background: rgba(35,52,23,0.5);">
+  <div class="bg-cream rounded-2xl shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+    <div class="flex items-center justify-between px-6 py-4 border-b border-dough sticky top-0 bg-cream">
+      <h2 class="font-bold text-cocoa text-lg">Add New Product</h2>
+      <button type="button" onclick="closeProductModal()" class="text-cocoa-light hover:text-cocoa text-2xl leading-none">&times;</button>
+    </div>
+
+    <form action="/admin/products" method="POST" enctype="multipart/form-data" class="grid sm:grid-cols-2 gap-4 p-6">
+      <div><label class="block text-sm font-medium text-cocoa mb-2">Name</label><input type="text" name="name" required class="input-field"></div>
+      <div><label class="block text-sm font-medium text-cocoa mb-2">Price (₦)</label><input type="number" name="price" required class="input-field"></div>
+      <div>
+        <label class="block text-sm font-medium text-cocoa mb-2">Category</label>
+        <select name="categoryId" required class="input-field">
+          <% categories.forEach(function(c) { %><option value="<%= c.id %>"><%= c.name %></option><% }); %>
+        </select>
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-cocoa mb-2">Visibility</label>
+        <select name="visibilityTier" class="input-field">
+          <option value="public">Public</option>
+          <option value="discreet">Discreet</option>
+          <option value="exclusive">Vault (Exclusive)</option>
+        </select>
+      </div>
+      <div class="sm:col-span-2">
+        <label class="block text-sm font-medium text-cocoa mb-2">Product Photo</label>
+        <input type="file" name="imageFile" accept="image/*" class="input-field">
+        <p class="text-xs text-cocoa-light mt-1">Uploaded to Cloudinary automatically. Or paste a URL instead:</p>
+        <input type="text" name="imageUrl" class="input-field mt-2" placeholder="/images/product.png">
+      </div>
+      <div class="sm:col-span-2"><label class="block text-sm font-medium text-cocoa mb-2">Description</label><textarea name="description" rows="2" class="input-field"></textarea></div>
+
+      <div>
+        <label class="block text-sm font-medium text-cocoa mb-2">Sourcing</label>
+        <select name="fulfillmentType" id="fulfillment-type" class="input-field">
+          <option value="in_house">In-house (tracked in branch inventory)</option>
+          <option value="third_party">Third-party (e.g. Oriflame — sourced on order)</option>
+        </select>
+      </div>
+      <div id="lead-time-field" class="hidden">
+        <label class="block text-sm font-medium text-cocoa mb-2">Lead Time (days)</label>
+        <input type="number" name="leadTimeDays" value="7" class="input-field">
+      </div>
+      <div class="sm:col-span-2 hidden" id="supplier-field">
+        <label class="block text-sm font-medium text-cocoa mb-2">Supplier Name</label>
+        <input type="text" name="supplierName" class="input-field" placeholder="e.g. Oriflame">
+      </div>
+
+      <div class="sm:col-span-2 border-t border-dough pt-4 mt-2">
+        <p class="text-sm text-cocoa-light mb-3">Optional — give it starting stock at one branch right away (in-house products only).</p>
+        <div class="grid sm:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-sm font-medium text-cocoa mb-2">Branch</label>
+            <select name="initialBranchId" class="input-field">
+              <option value="">— None —</option>
+              <% branches.forEach(function(b) { %><option value="<%= b.id %>"><%= b.name %></option><% }); %>
+            </select>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-cocoa mb-2">Quantity</label>
+            <input type="number" name="initialQuantity" class="input-field">
+          </div>
+        </div>
+      </div>
+
+      <div class="sm:col-span-2 flex gap-3">
+        <button type="button" onclick="closeProductModal()" class="btn-secondary flex-1">Cancel</button>
+        <button type="submit" class="btn-primary flex-1">Create Product</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+  function openProductModal() {
+    document.getElementById('product-modal').classList.remove('hidden');
+    document.getElementById('product-modal').classList.add('flex');
+  }
+  function closeProductModal() {
+    document.getElementById('product-modal').classList.add('hidden');
+    document.getElementById('product-modal').classList.remove('flex');
+  }
+  document.getElementById('fulfillment-type').addEventListener('change', function() {
+    document.getElementById('lead-time-field').classList.toggle('hidden', this.value !== 'third_party');
+    document.getElementById('supplier-field').classList.toggle('hidden', this.value !== 'third_party');
+  });
+  // reopen the modal automatically if the server re-rendered with validation errors
+  <% if (errors && errors.length) { %>
+  openProductModal();
+  <% } %>
+</script>

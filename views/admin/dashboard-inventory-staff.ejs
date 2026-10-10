@@ -1,0 +1,70 @@
+<h1 class="text-2xl font-bold text-cocoa mb-6">Inventory Dashboard</h1>
+
+<div class="grid grid-cols-2 sm:grid-cols-4 gap-5 mb-8">
+  <a href="/admin/inventory" class="card p-5 hover:shadow-md transition-shadow">
+    <p class="text-xs text-cocoa-light uppercase tracking-wide">Low Stock Items</p>
+    <p class="text-2xl font-bold <%= lowStockItems.length ? 'text-caramel-dark' : 'text-cocoa' %> mt-2"><%= lowStockItems.length %></p>
+  </a>
+  <a href="/admin/inventory" class="card p-5 hover:shadow-md transition-shadow">
+    <p class="text-xs text-cocoa-light uppercase tracking-wide">Products Stocked</p>
+    <p class="text-2xl font-bold text-cocoa mt-2"><%= totalProducts %></p>
+  </a>
+  <a href="/admin/transfers" class="card p-5 hover:shadow-md transition-shadow">
+    <p class="text-xs text-cocoa-light uppercase tracking-wide">Pending Transfers</p>
+    <p class="text-2xl font-bold <%= pendingIncomingTransfers.length ? 'text-caramel-dark' : 'text-cocoa' %> mt-2"><%= pendingIncomingTransfers.length %></p>
+  </a>
+  <a href="/admin/logistics/process" class="card p-5 hover:shadow-md transition-shadow">
+    <p class="text-xs text-cocoa-light uppercase tracking-wide">Process & Dispatch</p>
+    <p class="text-2xl font-bold text-cocoa mt-2">&rarr;</p>
+  </a>
+</div>
+
+<% if (pendingIncomingTransfers.length) { %>
+  <div class="card p-6 mb-8 border-2 border-caramel/40">
+    <h2 class="font-bold text-cocoa mb-1">Pending Incoming Transfers</h2>
+    <p class="text-sm text-cocoa-light mb-4">Confirm only once the stock has physically arrived.</p>
+    <div class="space-y-3">
+      <% pendingIncomingTransfers.forEach(function(tr) { %>
+        <div class="border border-caramel/30 bg-caramel/5 rounded-xl p-3 flex items-center justify-between gap-3">
+          <div>
+            <p class="font-semibold text-cocoa text-sm"><%= tr.Product ? tr.Product.name : '—' %> &times; <%= tr.quantity %></p>
+            <p class="text-xs text-cocoa-light">From <%= tr.fromBranch ? tr.fromBranch.name : 'New Intake' %></p>
+          </div>
+          <form action="/admin/transfers/<%= tr.id %>/receive" method="POST">
+            <button type="submit" class="btn-primary !py-1.5 !px-3 text-xs">Confirm Received</button>
+          </form>
+        </div>
+      <% }); %>
+    </div>
+  </div>
+<% } %>
+
+<% if (lowStockItems.length) { %>
+  <div class="card p-6 mb-8">
+    <h2 class="font-bold text-cocoa mb-4">Low Stock</h2>
+    <div class="space-y-2">
+      <% lowStockItems.forEach(function(item) { %>
+        <div class="flex items-center justify-between text-sm border-b border-dough/60 pb-2">
+          <span class="text-cocoa"><%= item.Product ? item.Product.name : 'Unknown product' %></span>
+          <span class="font-semibold text-caramel-dark"><%= item.quantity %> left</span>
+        </div>
+      <% }); %>
+    </div>
+  </div>
+<% } %>
+
+<div class="card p-6">
+  <h2 class="font-bold text-cocoa mb-4">Recently Received Transfers</h2>
+  <% if (!recentTransfers.length) { %>
+    <p class="text-sm text-cocoa-light">No transfers received yet.</p>
+  <% } else { %>
+    <div class="space-y-2">
+      <% recentTransfers.forEach(function(t) { %>
+        <div class="flex items-center justify-between text-sm border-b border-dough/60 pb-2">
+          <span class="text-cocoa"><%= t.Product ? t.Product.name : 'Unknown' %> &times; <%= t.quantity %></span>
+          <span class="text-cocoa-light"><%= new Date(t.createdAt).toLocaleDateString() %></span>
+        </div>
+      <% }); %>
+    </div>
+  <% } %>
+</div>

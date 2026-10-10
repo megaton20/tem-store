@@ -1,0 +1,44 @@
+<div class="flex items-center justify-between mb-6">
+  <h1 class="text-2xl font-bold text-cocoa">POS Applications</h1>
+  <form action="/admin/pos-applications/toggle" method="POST" class="flex items-center gap-3">
+    <span class="text-sm font-medium <%= isOpen ? 'text-forest' : 'text-caramel-dark' %>">Applications are <%= isOpen ? 'Open' : 'Closed' %></span>
+    <button type="submit" class="btn-secondary !py-1.5 !px-3 text-xs"><%= isOpen ? 'Close Applications' : 'Reopen Applications' %></button>
+  </form>
+</div>
+
+<div class="space-y-4">
+  <% applications.forEach(function(app) { %>
+    <div class="card p-5">
+      <div class="flex items-center justify-between mb-3">
+        <div>
+          <p class="font-semibold text-cocoa"><%= app.fullName %></p>
+          <p class="text-xs text-cocoa-light"><%= app.email %> &middot; <%= app.phone %></p>
+          <p class="text-xs text-cocoa-light"><%= app.address %>, <%= app.city %>, <%= app.state %></p>
+        </div>
+        <span class="text-xs font-semibold uppercase px-2 py-1 rounded-full <%= app.status === 'approved' ? 'bg-forest/10 text-forest' : app.status === 'rejected' ? 'bg-caramel-dark/10 text-caramel-dark' : 'bg-caramel/10 text-caramel-dark' %>"><%= app.status %></span>
+      </div>
+      <div class="text-sm text-cocoa-light mb-3 space-y-1">
+        <% if (app.preferredBranch) { %><p>Preferred branch: <span class="text-cocoa"><%= app.preferredBranch.name %></span></p><% } %>
+        <p>Retail experience: <span class="text-cocoa"><%= app.hasRetailExperience ? 'Yes' : 'No' %></span> &middot; Smartphone: <span class="text-cocoa"><%= app.hasSmartphone ? 'Yes' : 'No' %></span></p>
+        <% if (app.yearsExperience) { %><p>Experience: <span class="text-cocoa"><%= app.yearsExperience %> years</span></p><% } %>
+        <% if (app.notes) { %><p>Notes: <span class="text-cocoa"><%= app.notes %></span></p><% } %>
+      </div>
+      <% if (app.status === 'pending') { %>
+        <div class="flex items-center gap-3">
+          <form action="/admin/pos-applications/<%= app.id %>/approve" method="POST" class="flex items-center gap-2">
+            <select name="branchId" class="input-field !py-1.5 !text-xs">
+              <% branches.forEach(function(b) { %><option value="<%= b.id %>" <%= app.preferredBranchId === b.id ? 'selected' : '' %>><%= b.name %></option><% }); %>
+            </select>
+            <button type="submit" class="btn-primary !py-1.5 !px-3 text-xs">Approve & Promote to POS</button>
+          </form>
+          <form action="/admin/pos-applications/<%= app.id %>/reject" method="POST">
+            <button type="submit" class="btn-secondary !py-1.5 !px-3 text-xs">Reject</button>
+          </form>
+        </div>
+      <% } %>
+    </div>
+  <% }); %>
+  <% if (!applications.length) { %>
+    <div class="card p-10 text-center text-cocoa-light">No applications yet.</div>
+  <% } %>
+</div>

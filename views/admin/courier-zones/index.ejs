@@ -1,0 +1,54 @@
+<h1 class="text-2xl font-bold text-cocoa mb-1">Courier Zones & Pricing</h1>
+<p class="text-sm text-cocoa-light mb-6">These destinations and prices show up on the public <a href="/where-we-ship" target="_blank" class="text-caramel font-semibold">Where We Ship</a> page and drive walk-in delivery pricing.</p>
+
+<% if (errors && errors.length) { %>
+  <div class="bg-caramel-dark/10 border border-caramel-dark/30 text-caramel-dark rounded-xl px-4 py-3 mb-6 text-sm">
+    <ul class="list-disc list-inside"><% errors.forEach(function(e) { %><li><%= e %></li><% }); %></ul>
+  </div>
+<% } %>
+
+<div class="card p-6 mb-8">
+  <h2 class="font-bold text-cocoa mb-4">Add Destination</h2>
+  <form action="/admin/courier-zones" method="POST" class="grid sm:grid-cols-2 gap-4">
+    <div><label class="block text-sm font-medium text-cocoa mb-2">Zone Name</label><input type="text" name="name" required class="input-field" placeholder="e.g. Calabar Municipality"></div>
+    <div class="grid grid-cols-2 gap-4">
+      <div><label class="block text-sm font-medium text-cocoa mb-2">City</label><input type="text" name="city" required class="input-field"></div>
+      <div><label class="block text-sm font-medium text-cocoa mb-2">State</label><input type="text" name="state" required class="input-field" value="Cross River"></div>
+    </div>
+    <div><label class="block text-sm font-medium text-cocoa mb-2">Base Fee (negligible size)</label><input type="number" name="baseFee" required class="input-field"></div>
+    <div class="grid grid-cols-2 gap-4">
+      <div><label class="block text-sm font-medium text-cocoa mb-2">Medium Surcharge</label><input type="number" name="mediumSurcharge" value="0" class="input-field"></div>
+      <div><label class="block text-sm font-medium text-cocoa mb-2">Large Surcharge</label><input type="number" name="largeSurcharge" value="0" class="input-field"></div>
+    </div>
+    <button type="submit" class="btn-primary sm:col-span-2">Add Zone</button>
+  </form>
+</div>
+
+<div class="card overflow-x-auto">
+  <table class="w-full text-sm">
+    <thead class="bg-dough/40 text-cocoa-light text-left">
+      <tr><th class="px-4 py-3">Zone</th><th class="px-4 py-3">Base Fee</th><th class="px-4 py-3">+Medium</th><th class="px-4 py-3">+Large</th><th class="px-4 py-3">Status</th><th class="px-4 py-3"></th></tr>
+    </thead>
+    <tbody>
+      <% zones.forEach(function(z) { %>
+        <tr class="border-t border-dough/60">
+          <td class="px-4 py-3 font-medium text-cocoa"><%= z.name %> <span class="text-cocoa-light text-xs">(<%= z.city %>, <%= z.state %>)</span></td>
+          <td class="px-4 py-3 text-cocoa-light">&#8358;<%= Number(z.baseFee).toLocaleString() %></td>
+          <td class="px-4 py-3 text-cocoa-light">+&#8358;<%= Number(z.mediumSurcharge).toLocaleString() %></td>
+          <td class="px-4 py-3 text-cocoa-light">+&#8358;<%= Number(z.largeSurcharge).toLocaleString() %></td>
+          <td class="px-4 py-3">
+            <span class="text-xs font-semibold px-2 py-1 rounded-full <%= z.isActive ? 'bg-forest/10 text-forest' : 'bg-caramel-dark/10 text-caramel-dark' %>"><%= z.isActive ? 'Active' : 'Inactive' %></span>
+          </td>
+          <td class="px-4 py-3">
+            <form action="/admin/courier-zones/<%= z.id %>/toggle" method="POST">
+              <button type="submit" class="btn-secondary !py-1 !px-3 text-xs"><%= z.isActive ? 'Deactivate' : 'Activate' %></button>
+            </form>
+          </td>
+        </tr>
+      <% }); %>
+      <% if (!zones.length) { %>
+        <tr><td colspan="6" class="px-4 py-8 text-center text-cocoa-light">No destinations yet.</td></tr>
+      <% } %>
+    </tbody>
+  </table>
+</div>

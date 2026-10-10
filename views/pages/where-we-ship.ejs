@@ -1,0 +1,66 @@
+<section class="max-w-4xl mx-auto px-5 sm:px-8 py-16">
+  <h1 class="text-4xl font-bold text-cocoa mb-3">Where We Ship</h1>
+  <p class="text-cocoa-light mb-10">Where TEM Store delivers products ordered online, and where our walk-in courier service can carry a package for you.</p>
+
+  <h2 class="text-2xl font-bold text-cocoa mb-2">Product Home Delivery</h2>
+  <p class="text-cocoa-light mb-4">Order cookies, gadgets, and everything else online - delivered to your door in these cities. Pricing is set per city, not one flat rate per state.</p>
+
+  <% const zonesByState = {}; deliveryZones.forEach(function(z) { if (!zonesByState[z.state]) zonesByState[z.state] = []; zonesByState[z.state].push(z); }); %>
+
+  <% Object.keys(zonesByState).forEach(function(state) { %>
+    <h3 class="text-sm font-semibold uppercase tracking-wide text-forest mt-6 mb-2"><%= state %></h3>
+    <div class="card overflow-x-auto mb-4">
+      <table class="w-full text-sm">
+        <thead class="bg-dough/40 text-cocoa-light text-left">
+          <tr><th class="px-4 py-3">City</th><th class="px-4 py-3">Delivery Fee</th><th class="px-4 py-3">Estimated Time</th></tr>
+        </thead>
+        <tbody>
+          <% zonesByState[state].forEach(function(z) { %>
+            <tr class="border-t border-dough/60">
+              <td class="px-4 py-3 font-medium text-cocoa"><%= z.city %></td>
+              <td class="px-4 py-3 text-cocoa-light">&#8358;<%= Number(z.fee).toLocaleString() %></td>
+              <td class="px-4 py-3 text-cocoa-light"><%= z.estimatedDays %></td>
+            </tr>
+          <% }); %>
+        </tbody>
+      </table>
+    </div>
+  <% }); %>
+  <% if (!deliveryZones.length) { %>
+    <div class="card p-8 text-center text-cocoa-light mb-10">Home delivery cities coming soon - pickup is available at our kiosks in the meantime.</div>
+  <% } %>
+
+  <div class="border-t border-dough my-12"></div>
+
+  <h2 class="text-2xl font-bold text-cocoa mb-2">Walk-in Courier Service</h2>
+  <p class="text-cocoa-light mb-4">Beyond delivering our own products, TEM Store also runs walk-in courier service - drop off a package at any of our kiosks and we'll get it where it needs to go. Flat rates by destination, shown below.</p>
+  <p class="text-cocoa-light mb-6">Visit any <a href="/locations" class="text-caramel font-semibold">TEM Store location</a> to send a package.</p>
+
+  <div class="card overflow-x-auto">
+    <table class="w-full text-sm">
+      <thead class="bg-dough/40 text-cocoa-light text-left">
+        <tr>
+          <th class="px-4 py-3">Destination</th>
+          <th class="px-4 py-3">Negligible Size <span class="font-normal">(documents, small envelope)</span></th>
+          <th class="px-4 py-3">Medium</th>
+          <th class="px-4 py-3">Large</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% courierZones.forEach(function(z) { %>
+          <tr class="border-t border-dough/60">
+            <td class="px-4 py-3 font-medium text-cocoa"><%= z.name %> <span class="text-cocoa-light text-xs">(<%= z.city %>, <%= z.state %>)</span></td>
+            <td class="px-4 py-3 text-cocoa-light">&#8358;<%= Number(z.baseFee).toLocaleString() %></td>
+            <td class="px-4 py-3 text-cocoa-light">&#8358;<%= (Number(z.baseFee) + Number(z.mediumSurcharge)).toLocaleString() %></td>
+            <td class="px-4 py-3 text-cocoa-light">&#8358;<%= (Number(z.baseFee) + Number(z.largeSurcharge)).toLocaleString() %></td>
+          </tr>
+        <% }); %>
+        <% if (!courierZones.length) { %>
+          <tr><td colspan="4" class="px-4 py-8 text-center text-cocoa-light">Destinations coming soon.</td></tr>
+        <% } %>
+      </tbody>
+    </table>
+  </div>
+
+  <p class="text-xs text-cocoa-light mt-4">Don't see your destination? <a href="/contact" class="text-caramel font-medium">Contact us</a> — we're adding new zones and cities as we grow.</p>
+</section>

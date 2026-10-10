@@ -1,0 +1,29 @@
+<section class="max-w-lg mx-auto px-5 sm:px-8 py-16">
+  <h1 class="text-3xl font-bold text-cocoa mb-2">Contact Us</h1>
+  <p class="text-cocoa-light mb-8">Questions about an order, a kiosk, or anything else — send us a message.</p>
+
+  <% if (sent) { %>
+    <div class="bg-forest/10 border border-forest/30 text-forest rounded-xl px-4 py-3 mb-6 text-sm">
+      Thanks — we've received your message and will get back to you shortly.
+    </div>
+  <% } %>
+  <% if (error) { %>
+    <div class="bg-caramel-dark/10 border border-caramel-dark/30 text-caramel-dark rounded-xl px-4 py-3 mb-6 text-sm"><%= error %></div>
+  <% } %>
+
+  <form action="/contact" method="POST" class="space-y-4">
+    <div>
+      <label class="block text-sm font-medium text-cocoa mb-2">Name</label>
+      <input type="text" name="name" required class="input-field">
+    </div>
+    <div>
+      <label class="block text-sm font-medium text-cocoa mb-2">Email</label>
+      <input type="email" name="email" required class="input-field">
+    </div>
+    <div>
+      <label class="block text-sm font-medium text-cocoa mb-2">Message</label>
+      <textarea name="message" rows="5" required class="input-field"></textarea>
+    </div>
+    <button type="submit" class="btn-primary w-full">Send Message</button>
+  </form>
+</section>

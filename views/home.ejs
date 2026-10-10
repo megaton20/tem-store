@@ -1,0 +1,145 @@
+<!-- HERO -->
+<section class="relative overflow-hidden bg-gradient-to-b from-dough/70 to-cream">
+  <div class="max-w-7xl mx-auto px-5 sm:px-8 pt-14 pb-20 lg:pt-20 lg:pb-28 grid lg:grid-cols-2 gap-12 items-center">
+
+    <div class="relative z-10">
+      <span class="inline-flex items-center gap-2 bg-forest/10 text-forest text-xs font-semibold uppercase tracking-wide px-3 py-1.5 rounded-full">
+        Baked fresh in Calabar
+      </span>
+      <h1 class="mt-5 text-4xl sm:text-5xl lg:text-6xl font-bold text-cocoa leading-[1.05]">
+        Cookies that taste like<br class="hidden sm:block"> <span class="text-caramel">second nature.</span>
+      </h1>
+      <p class="mt-5 text-lg text-cocoa-light max-w-md">
+        Small-batch, handmade, and gone within the hour. Order online, pick up at a kiosk near you, or have them delivered straight to your door.
+      </p>
+      <div class="mt-8 flex flex-wrap gap-4">
+        <a href="/shop?category=cookies" class="btn-primary">Shop Cookies</a>
+        <a href="/shop" class="btn-secondary">Browse Everything</a>
+      </div>
+    </div>
+
+    <!-- Floating cookie stack -->
+    <div class="relative h-72 sm:h-96 lg:h-[28rem]">
+      <div class="absolute inset-0 flex items-center justify-center">
+        <div class="w-64 h-64 sm:w-80 sm:h-80 rounded-full bg-caramel/15 blur-3xl"></div>
+      </div>
+
+      <% const heroImages = flagshipProducts.slice(0, 3); %>
+      <% if (heroImages[0]) { %>
+        <img src="<%= heroImages[0].imageUrl %>" alt="<%= heroImages[0].name %>"
+             class="absolute left-[8%] top-[8%] w-32 sm:w-44 lg:w-52 drop-shadow-2xl animate-floatA"
+             onerror="this.style.display='none'">
+      <% } %>
+      <% if (heroImages[1]) { %>
+        <img src="<%= heroImages[1].imageUrl %>" alt="<%= heroImages[1].name %>"
+             class="absolute right-[6%] top-[18%] w-28 sm:w-40 lg:w-48 drop-shadow-2xl animate-floatB"
+             onerror="this.style.display='none'">
+      <% } %>
+      <% if (heroImages[2]) { %>
+        <img src="<%= heroImages[2].imageUrl %>" alt="<%= heroImages[2].name %>"
+             class="absolute left-[22%] bottom-[6%] w-32 sm:w-48 lg:w-56 drop-shadow-2xl animate-floatC"
+             onerror="this.style.display='none'">
+      <% } %>
+    </div>
+  </div>
+</section>
+
+<!-- FLAGSHIP: SECOND NATURE COOKIES -->
+<section class="max-w-7xl mx-auto px-5 sm:px-8 py-16">
+  <div class="flex items-end justify-between mb-8">
+    <div>
+      <span class="text-xs font-semibold uppercase tracking-wide text-forest">Our Flagship</span>
+      <h2 class="text-3xl font-bold text-cocoa mt-1">Second Nature Cookies</h2>
+    </div>
+    <a href="/shop?category=cookies" class="hidden sm:inline text-sm font-semibold text-caramel hover:text-caramel-dark">See all &rarr;</a>
+  </div>
+
+  <div class="grid grid-cols-2 lg:grid-cols-4 gap-5 sm:gap-6">
+    <% flagshipProducts.forEach(function(product) { %>
+      <div class="card group">
+        <a href="/product/<%= product.slug %>" class="block aspect-square bg-dough/40 overflow-hidden">
+          <img src="<%= product.imageUrl %>" alt="<%= product.name %>" class="w-full h-full object-contain p-6 group-hover:scale-105 transition-transform duration-300" onerror="this.src='https://via.placeholder.com/400x400/EFE0C8/3A2317?text=%F0%9F%8D%AA'">
+        </a>
+        <div class="p-4">
+          <a href="/product/<%= product.slug %>" class="font-semibold text-cocoa hover:text-caramel line-clamp-1"><%= product.name %></a>
+          <p class="text-cocoa-light text-sm mt-1">&#8358;<%= Number(product.price).toLocaleString() %></p>
+          <div class="mt-3" data-cart-button data-product-id="<%= product.id %>" data-initial-quantity="<%= (cartQuantities && cartQuantities[product.id]) || 0 %>"></div>
+        </div>
+      </div>
+    <% }); %>
+  </div>
+</section>
+
+<!-- CATEGORY STRIP -->
+<% if (publicCategories.length) { %>
+<section class="bg-dough/40 py-16">
+  <div class="max-w-7xl mx-auto px-5 sm:px-8">
+    <h2 class="text-3xl font-bold text-cocoa mb-8">Shop by Category</h2>
+    <div class="grid sm:grid-cols-3 gap-6">
+      <% publicCategories.forEach(function(cat) { %>
+        <a href="/shop?category=<%= cat.slug %>" class="card p-6 flex items-center justify-between hover:shadow-md transition-shadow">
+          <div>
+            <h3 class="font-semibold text-lg text-cocoa"><%= cat.name %></h3>
+            <% if (cat.description) { %><p class="text-sm text-cocoa-light mt-1"><%= cat.description %></p><% } %>
+          </div>
+          <span class="text-caramel text-xl">&rarr;</span>
+        </a>
+      <% }); %>
+    </div>
+  </div>
+</section>
+<% } %>
+
+<!-- MORE PRODUCTS -->
+<% if (otherProducts.length) { %>
+<section class="max-w-7xl mx-auto px-5 sm:px-8 py-16">
+  <div class="flex items-end justify-between mb-8">
+    <h2 class="text-3xl font-bold text-cocoa">More From TEM Store</h2>
+    <a href="/shop" class="hidden sm:inline text-sm font-semibold text-caramel hover:text-caramel-dark">See all &rarr;</a>
+  </div>
+  <div class="grid grid-cols-2 lg:grid-cols-4 gap-5 sm:gap-6">
+    <% otherProducts.forEach(function(product) { %>
+      <div class="card group">
+        <a href="/product/<%= product.slug %>" class="block aspect-square bg-dough/40 overflow-hidden">
+          <img src="<%= product.imageUrl %>" alt="<%= product.name %>" class="w-full h-full object-contain p-6 group-hover:scale-105 transition-transform duration-300" onerror="this.src='https://via.placeholder.com/400x400/EFE0C8/3A2317?text=TEM'">
+        </a>
+        <div class="p-4">
+          <a href="/product/<%= product.slug %>" class="font-semibold text-cocoa hover:text-caramel line-clamp-1"><%= product.name %></a>
+          <p class="text-cocoa-light text-sm mt-1">&#8358;<%= Number(product.price).toLocaleString() %></p>
+          <div class="mt-3" data-cart-button data-product-id="<%= product.id %>" data-initial-quantity="<%= (cartQuantities && cartQuantities[product.id]) || 0 %>"></div>
+        </div>
+      </div>
+    <% }); %>
+  </div>
+</section>
+<% } %>
+
+<!-- PICKUP + DELIVERY BLURB -->
+<section class="max-w-7xl mx-auto px-5 sm:px-8 pb-16">
+  <div class="grid sm:grid-cols-2 gap-6">
+    <div class="card p-8">
+      <span class="text-3xl">🏪</span>
+      <h3 class="font-bold text-xl text-cocoa mt-3">Pickup Kiosks in Calabar</h3>
+      <p class="text-cocoa-light mt-2 text-sm">Grab your order fresh from a kiosk near you — Marian Market, Watt Market, and Unical Junction, with more on the way. <a href="/locations" class="text-caramel font-semibold">See all locations &rarr;</a></p>
+    </div>
+    <div class="card p-8">
+      <span class="text-3xl">🛵</span>
+      <h3 class="font-bold text-xl text-cocoa mt-3">Home Delivery</h3>
+      <p class="text-cocoa-light mt-2 text-sm">Prefer it delivered? We'll bring it to your door across Calabar, with more states coming soon.</p>
+    </div>
+  </div>
+</section>
+
+<!-- WHATSAPP CHANNEL -->
+<section class="max-w-7xl mx-auto px-5 sm:px-8 pb-16">
+  <a href="https://wa.me/2340000000000" target="_blank" rel="noopener" class="card p-6 flex items-center justify-between gap-4 hover:shadow-md transition-shadow bg-forest/5">
+    <div class="flex items-center gap-4">
+      <span class="text-3xl">💬</span>
+      <div>
+        <p class="font-bold text-cocoa">Join our WhatsApp Channel</p>
+        <p class="text-sm text-cocoa-light">New flavors, restocks, and kiosk updates — straight to your phone.</p>
+      </div>
+    </div>
+    <span class="text-forest font-semibold text-sm whitespace-nowrap">Join Now &rarr;</span>
+  </a>
+</section>

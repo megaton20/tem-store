@@ -1,0 +1,122 @@
+<h1 class="text-2xl font-bold text-cocoa mb-1">Book a Walk-in Delivery</h1>
+<p class="text-sm text-cocoa-light mb-6">For deliveries that aren't a TEM Store order — a customer sending a package through us.</p>
+
+<% if (errors && errors.length) { %>
+  <div class="bg-caramel-dark/10 border border-caramel-dark/30 text-caramel-dark rounded-xl px-4 py-3 mb-6 text-sm">
+    <ul class="list-disc list-inside"><% errors.forEach(function(e) { %><li><%= e %></li><% }); %></ul>
+  </div>
+<% } %>
+
+<% if (!zones.length) { %>
+  <div class="card p-8 text-center text-cocoa-light">No courier destinations set up yet. Ask a super admin to add zones under Courier Zones & Pricing.</div>
+<% } else { %>
+<form action="/admin/logistics/book" method="POST" class="card p-6 space-y-6 max-w-2xl">
+  <% if (!ownBranchId) { %>
+    <div>
+      <label class="block text-sm font-medium text-cocoa mb-2">Pickup Branch</label>
+      <select name="pickupBranchId" required class="input-field">
+        <% branches.forEach(function(b) { %><option value="<%= b.id %>" <%= defaultBranchId === b.id ? 'selected' : '' %>><%= b.name %></option><% }); %>
+      </select>
+    </div>
+  <% } %>
+
+  <div class="border-t border-dough pt-4">
+    <p class="text-sm font-semibold text-cocoa mb-3">Sender</p>
+    <div class="grid sm:grid-cols-2 gap-4">
+      <div><label class="block text-sm font-medium text-cocoa mb-2">Name</label><input type="text" name="senderName" required class="input-field"></div>
+      <div><label class="block text-sm font-medium text-cocoa mb-2">Phone</label><input type="text" name="senderPhone" required class="input-field"></div>
+    </div>
+  </div>
+
+  <div class="border-t border-dough pt-4">
+    <p class="text-sm font-semibold text-cocoa mb-3">Recipient</p>
+    <div class="grid sm:grid-cols-2 gap-4">
+      <div><label class="block text-sm font-medium text-cocoa mb-2">Name</label><input type="text" name="recipientName" required class="input-field"></div>
+      <div><label class="block text-sm font-medium text-cocoa mb-2">Phone</label><input type="text" name="recipientPhone" required class="input-field"></div>
+    </div>
+    <div class="mt-4">
+      <label class="block text-sm font-medium text-cocoa mb-2">Delivery Address</label>
+      <input type="text" name="deliveryAddress" required class="input-field">
+    </div>
+  </div>
+
+  <div class="border-t border-dough pt-4">
+    <p class="text-sm font-semibold text-cocoa mb-3">Package & Pricing</p>
+    <div class="grid sm:grid-cols-2 gap-4">
+      <div>
+        <label class="block text-sm font-medium text-cocoa mb-2">Destination</label>
+        <select name="courierZoneId" id="zone-select" required class="input-field">
+          <option value="">Select a destination</option>
+          <% zones.forEach(function(z) { %>
+            <option value="<%= z.id %>" data-base="<%= z.baseFee %>" data-medium="<%= z.mediumSurcharge %>" data-large="<%= z.largeSurcharge %>">
+              <%= z.name %> (<%= z.city %>, <%= z.state %>)
+            </option>
+          <% }); %>
+        </select>
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-cocoa mb-2">Package Size</label>
+        <select name="packageSize" id="size-select" class="input-field">
+          <option value="negligible">Negligible (documents, small envelope)</option>
+          <option value="medium">Medium</option>
+          <option value="large">Large</option>
+        </select>
+      </div>
+    </div>
+    <div class="mt-4">
+      <label class="block text-sm font-medium text-cocoa mb-2">What's being sent</label>
+      <input type="text" name="description" required class="input-field" placeholder="e.g. Sealed envelope of documents">
+    </div>
+
+    <div class="mt-4 bg-forest/5 border border-forest/20 rounded-xl p-4 flex items-center justify-between">
+      <span class="text-sm text-cocoa">Delivery Fee</span>
+      <span id="fee-preview" class="text-xl font-bold text-forest">&#8358;0</span>
+    </div>
+  </div>
+
+  <div class="border-t border-dough pt-4">
+    <p class="text-sm font-semibold text-cocoa mb-3">Payment</p>
+    <div class="grid sm:grid-cols-2 gap-4">
+      <div>
+        <label class="block text-sm font-medium text-cocoa mb-2">Method</label>
+        <select name="paymentMethod" class="input-field">
+          <option value="cash">Cash</option>
+          <option value="transfer">Bank Transfer</option>
+          <option value="pos_card">Card (POS machine)</option>
+        </select>
+      </div>
+      <div class="flex items-end pb-3">
+        <label class="flex items-center gap-2 text-sm text-cocoa">
+          <input type="checkbox" name="paymentReceived" checked> Payment collected now
+        </label>
+      </div>
+    </div>
+  </div>
+
+  <button type="submit" class="btn-primary w-full">Book Delivery</button>
+</form>
+<% } %>
+
+<script>
+  function updateFeePreview() {
+    const zoneSelect = document.getElementById('zone-select');
+    const sizeSelect = document.getElementById('size-select');
+    const option = zoneSelect.options[zoneSelect.selectedIndex];
+    const feeEl = document.getElementById('fee-preview');
+    if (!option || !option.dataset.base) { feeEl.textContent = '₦0'; return; }
+
+    const base = parseFloat(option.dataset.base);
+    const medium = parseFloat(option.dataset.medium || 0);
+    const large = parseFloat(option.dataset.large || 0);
+    let fee = base;
+    if (sizeSelect.value === 'medium') fee = base + medium;
+    if (sizeSelect.value === 'large') fee = base + large;
+    feeEl.textContent = '₦' + fee.toLocaleString();
+  }
+  const zoneSelect = document.getElementById('zone-select');
+  const sizeSelect = document.getElementById('size-select');
+  if (zoneSelect && sizeSelect) {
+    zoneSelect.addEventListener('change', updateFeePreview);
+    sizeSelect.addEventListener('change', updateFeePreview);
+  }
+</script>

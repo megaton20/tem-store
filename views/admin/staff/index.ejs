@@ -1,0 +1,63 @@
+<h1 class="text-2xl font-bold text-cocoa mb-6">Staff</h1>
+
+<% if (errors && errors.length) { %>
+  <div class="bg-caramel-dark/10 border border-caramel-dark/30 text-caramel-dark rounded-xl px-4 py-3 mb-6 text-sm">
+    <ul class="list-disc list-inside"><% errors.forEach(function(e) { %><li><%= e %></li><% }); %></ul>
+  </div>
+<% } %>
+
+<div class="card p-6 mb-8">
+  <h2 class="font-bold text-cocoa mb-4">Add Staff Member</h2>
+  <form action="/admin/staff" method="POST" class="grid sm:grid-cols-2 gap-4">
+    <div><label class="block text-sm font-medium text-cocoa mb-2">Full Name</label><input type="text" name="fullName" required class="input-field"></div>
+    <div><label class="block text-sm font-medium text-cocoa mb-2">Email</label><input type="email" name="email" required class="input-field"></div>
+    <div><label class="block text-sm font-medium text-cocoa mb-2">Phone</label><input type="text" name="phone" required class="input-field"></div>
+    <div><label class="block text-sm font-medium text-cocoa mb-2">Temporary Password</label><input type="text" name="password" required class="input-field"></div>
+    <div>
+      <label class="block text-sm font-medium text-cocoa mb-2">Role</label>
+      <select name="role" required class="input-field" onchange="document.getElementById('branch-field').classList.toggle('hidden', this.value === 'super_admin')">
+        <% roles.forEach(function(r) { %><option value="<%= r %>"><%= r.replace(/_/g, ' ') %></option><% }); %>
+      </select>
+    </div>
+    <div id="branch-field">
+      <label class="block text-sm font-medium text-cocoa mb-2">Branch</label>
+      <select name="branchId" class="input-field">
+        <% branches.forEach(function(b) { %><option value="<%= b.id %>"><%= b.name %></option><% }); %>
+      </select>
+    </div>
+    <button type="submit" class="btn-primary sm:col-span-2">Create Staff Account</button>
+  </form>
+</div>
+
+<div class="card overflow-x-auto">
+  <table class="w-full text-sm">
+    <thead class="bg-dough/40 text-cocoa-light text-left">
+      <tr><th class="px-4 py-3">Name</th><th class="px-4 py-3">Email</th><th class="px-4 py-3">Role</th><th class="px-4 py-3">Branch</th><th class="px-4 py-3">Status</th><th class="px-4 py-3"></th></tr>
+    </thead>
+    <tbody>
+      <% staff.forEach(function(s) { %>
+        <tr class="border-t border-dough/60">
+          <td class="px-4 py-3 font-medium text-cocoa"><%= s.fullName %></td>
+          <td class="px-4 py-3 text-cocoa-light"><%= s.email %></td>
+          <td class="px-4 py-3 text-cocoa-light capitalize"><%= s.role.replace(/_/g, ' ') %></td>
+          <td class="px-4 py-3 text-cocoa-light"><%= s.branch ? s.branch.name : '—' %></td>
+          <td class="px-4 py-3">
+            <span class="text-xs font-semibold px-2 py-1 rounded-full <%= s.isActiveStaff ? 'bg-forest/10 text-forest' : 'bg-caramel-dark/10 text-caramel-dark' %>"><%= s.isActiveStaff ? 'Active' : 'Deactivated' %></span>
+          </td>
+          <td class="px-4 py-3">
+            <form action="/admin/staff/<%= s.id %>" method="POST" class="flex items-center gap-2">
+              <select name="role" class="input-field !py-1 !text-xs">
+                <% roles.forEach(function(r) { %><option value="<%= r %>" <%= s.role === r ? 'selected' : '' %>><%= r.replace(/_/g, ' ') %></option><% }); %>
+              </select>
+              <select name="branchId" class="input-field !py-1 !text-xs">
+                <% branches.forEach(function(b) { %><option value="<%= b.id %>" <%= s.branchId === b.id ? 'selected' : '' %>><%= b.name %></option><% }); %>
+              </select>
+              <label class="flex items-center gap-1 text-xs"><input type="checkbox" name="isActiveStaff" <%= s.isActiveStaff ? 'checked' : '' %>> Active</label>
+              <button type="submit" class="btn-secondary !py-1 !px-2 text-xs">Save</button>
+            </form>
+          </td>
+        </tr>
+      <% }); %>
+    </tbody>
+  </table>
+</div>
