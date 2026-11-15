@@ -27,7 +27,7 @@
   </div>
 <% } %>
 
-<form action="/admin/products/<%= product.id %>" method="POST" enctype="multipart/form-data" class="card p-6 grid sm:grid-cols-2 gap-4">
+<form id="product-form" action="/admin/products/<%= product.id %>" method="POST" enctype="multipart/form-data" class="card p-6 grid sm:grid-cols-2 gap-4">
   <div><label class="block text-sm font-medium text-cocoa mb-2">Name</label><input name="name" required class="input-field" value="<%= product.name %>"></div>
   <div>
     <label class="block text-sm font-medium text-cocoa mb-2">Price (₦)</label>
@@ -48,11 +48,44 @@
     </select>
   </div>
 
+  <!-- PRIMARY IMAGE -->
   <div class="sm:col-span-2">
-    <label class="block text-sm font-medium text-cocoa mb-2">Product Photo</label>
-    <% if (product.imageUrl) { %><img src="<%= product.imageUrl %>" class="h-24 w-24 object-cover rounded-lg mb-2"><% } %>
-    <input type="file" name="imageFile" accept="image/*" class="input-field">
-    <input type="text" name="imageUrl" class="input-field mt-2" placeholder="/images/product.png" value="<%= product.imageUrl || '' %>">
+    <label class="block text-sm font-medium text-cocoa mb-2">Primary Photo</label>
+
+    <div id="primary-preview-wrap" class="<%= product.imageUrl ? '' : 'hidden' %> mb-2 relative inline-block">
+      <img id="primary-preview" src="<%= product.imageUrl || '' %>" class="h-28 w-28 object-cover rounded-lg border border-dough">
+      <button type="button" onclick="clearPrimary()" class="absolute -top-2 -right-2 bg-caramel-dark text-white rounded-full h-6 w-6 text-xs leading-none flex items-center justify-center shadow" title="Remove image">&times;</button>
+    </div>
+
+    <input id="primary-file" type="file" name="imageFile" accept="image/*" class="input-field" onchange="previewPrimary(this)">
+    <input id="primary-url" type="text" name="imageUrl" class="input-field mt-2" placeholder="/images/product.png" value="<%= product.imageUrl || '' %>" oninput="previewPrimaryUrl(this.value)">
+    <input type="hidden" id="primary-clear" name="clearPrimary" value="0">
+    <p class="text-xs text-cocoa-light mt-1">Pick a file to upload, or paste a URL. Click × to remove before saving.</p>
+  </div>
+
+  <!-- GALLERY -->
+  <div class="sm:col-span-2">
+    <label class="block text-sm font-medium text-cocoa mb-2">Gallery (extra photos)</label>
+
+    <% if (product.gallery && product.gallery.length) { %>
+      <div class="flex flex-wrap gap-2 mb-3">
+        <% product.gallery.forEach(function(url, i) { %>
+          <div class="relative">
+            <img src="<%= url %>" class="h-20 w-20 object-cover rounded-lg border border-dough">
+            <label class="absolute top-1 left-1 bg-cream/90 rounded px-1 text-[10px] text-cocoa cursor-pointer" title="Mark for removal">
+              <input type="checkbox" name="removeGallery[]" value="<%= url %>" class="accent-caramel-dark align-middle">
+              <span class="align-middle ml-0.5">✕</span>
+            </label>
+            <p class="text-[10px] text-cocoa-light text-center mt-1">#<%= i + 1 %></p>
+          </div>
+        <% }); %>
+      </div>
+      <p class="text-xs text-cocoa-light mb-2">Tick ✕ on any image you want removed when you save.</p>
+    <% } %>
+
+    <input id="gallery-file" type="file" name="imageFiles" accept="image/*" multiple class="input-field" onchange="previewGallery(this)">
+    <div id="gallery-new-previews" class="flex flex-wrap gap-2 mt-3"></div>
+    <p class="text-xs text-cocoa-light mt-1">Pick multiple files at once. Remove a pending one with × before saving.</p>
   </div>
 
   <div class="sm:col-span-2"><label class="block text-sm font-medium text-cocoa mb-2">Description</label><textarea name="description" rows="3" class="input-field"><%= product.description || '' %></textarea></div>
@@ -80,7 +113,6 @@
 </form>
 
 <% if (canChangeGlobal) { %>
-<!-- Delete warning modal -->
 <div id="delete-modal" class="fixed inset-0 z-50 hidden items-center justify-center p-4" style="background: rgba(35,52,23,0.5);">
   <div class="bg-cream rounded-2xl shadow-xl max-w-md w-full p-6">
     <h2 class="font-bold text-cocoa text-lg mb-2">Delete “<%= product.name %>”?</h2>
@@ -96,9 +128,7 @@
     </ul>
     <form action="/admin/products/<%= product.id %>/delete" method="POST" class="flex gap-3">
       <button type="button" onclick="closeDeleteModal()" class="btn-secondary flex-1">Cancel</button>
-      <button type="submit" class="btn-primary flex-1 !bg-caramel-dark">
-        <%= orderUsage > 0 ? 'Yes, deactivate' : 'Yes, delete' %>
-      </button>
+      <button type="submit" class="btn-primary flex-1 !bg-caramel-dark"><%= orderUsage > 0 ? 'Yes, deactivate' : 'Yes, delete' %></button>
     </form>
   </div>
 </div>
@@ -107,6 +137,86 @@
 <script>
   function openDeleteModal(){ const m=document.getElementById('delete-modal'); if(!m) return; m.classList.remove('hidden'); m.classList.add('flex'); }
   function closeDeleteModal(){ const m=document.getElementById('delete-modal'); if(!m) return; m.classList.add('hidden'); m.classList.remove('flex'); }
+
+  // ---------- PRIMARY ----------
+  function previewPrimary(input) {
+    if (!input.files || !input.files[0]) return;
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      document.getElementById('primary-preview').src = e.target.result;
+      document.getElementById('primary-preview-wrap').classList.remove('hidden');
+      document.getElementById('primary-clear').value = '0';
+      document.getElementById('primary-url').value = ''; // avoid URL winning alongside a file
+    };
+    reader.readAsDataURL(input.files[0]);
+  }
+  function previewPrimaryUrl(url) {
+    const wrap = document.getElementById('primary-preview-wrap');
+    const img = document.getElementById('primary-preview');
+    if (url && url.trim()) {
+      img.src = url.trim();
+      wrap.classList.remove('hidden');
+      document.getElementById('primary-clear').value = '0';
+    } else {
+      wrap.classList.add('hidden');
+      img.src = '';
+    }
+  }
+  function clearPrimary() {
+    document.getElementById('primary-file').value = '';
+    document.getElementById('primary-url').value = '';
+    document.getElementById('primary-preview').src = '';
+    document.getElementById('primary-preview-wrap').classList.add('hidden');
+    document.getElementById('primary-clear').value = '1';
+  }
+
+  // ---------- GALLERY (pending only) ----------
+  let pendingGalleryFiles = [];
+  function previewGallery(input) {
+    if (!input.files) return;
+    pendingGalleryFiles = [...pendingGalleryFiles, ...Array.from(input.files)];
+    renderPendingGallery();
+    syncGalleryInput();
+  }
+  function renderPendingGallery() {
+    const wrap = document.getElementById('gallery-new-previews');
+    wrap.innerHTML = '';
+    pendingGalleryFiles.forEach((file, i) => {
+      const tile = document.createElement('div');
+      tile.className = 'relative';
+      const img = document.createElement('img');
+      img.className = 'h-20 w-20 object-cover rounded-lg border border-forest/40';
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.innerHTML = '&times;';
+      btn.className = 'absolute -top-2 -right-2 bg-caramel-dark text-white rounded-full h-6 w-6 text-xs leading-none flex items-center justify-center shadow';
+      btn.title = 'Remove this pending image';
+      btn.onclick = () => { pendingGalleryFiles.splice(i, 1); renderPendingGallery(); syncGalleryInput(); };
+      tile.appendChild(img); tile.appendChild(btn);
+      wrap.appendChild(tile);
+      const reader = new FileReader();
+      reader.onload = (e) => { img.src = e.target.result; };
+      reader.readAsDataURL(file);
+    });
+  }
+  function syncGalleryInput() {
+    const input = document.getElementById('gallery-file');
+    const dt = new DataTransfer();
+    pendingGalleryFiles.forEach((f) => dt.items.add(f));
+    input.files = dt.files;
+  }
+
+  // on submit, clear URL if a file is present so they can't collide
+  const form = document.getElementById('product-form');
+  if (form) {
+    form.addEventListener('submit', () => {
+      const f = document.getElementById('primary-file');
+      if (f.files && f.files.length) {
+        document.getElementById('primary-url').value = '';
+      }
+    });
+  }
+
   const ft = document.getElementById('fulfillment-type');
   if (ft && !ft.disabled) {
     ft.addEventListener('change', function(){

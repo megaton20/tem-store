@@ -117,12 +117,20 @@ router.post('/admin/pos-applications/toggle', requirePermission('rider_apps'), p
 
 // Products
 // - super_admin: full control (create, edit, toggle, delete)
-// - branch_manager: edit details only (no create/delete/toggle, price & visibility locked in controller)
-router.get('/admin/products',             requirePermission('products', 'products:edit'), productController.listProducts);
-router.get('/admin/products/:id',         requirePermission('products', 'products:edit'), productController.showProduct);
-router.post('/admin/products/:id',        requirePermission('products', 'products:edit'), upload.single('imageFile'), productController.updateProduct);
 
-router.post('/admin/products',            requirePermission('products'), upload.single('imageFile'), productController.createProduct);
+router.get('/admin/products', requirePermission('products', 'products:edit'), productController.listProducts);
+router.get('/admin/products/:id', requirePermission('products', 'products:edit'), productController.showProduct);
+
+router.post('/admin/products',
+  requirePermission('products'),
+  upload.fields([{ name: 'imageFile', maxCount: 1 }, { name: 'imageFiles', maxCount: 8 }]),
+  productController.createProduct);
+
+router.post('/admin/products/:id',
+  requirePermission('products', 'products:edit'),
+  upload.fields([{ name: 'imageFile', maxCount: 1 }, { name: 'imageFiles', maxCount: 8 }]),
+productController.updateProduct);
+
 router.post('/admin/products/:id/toggle', requirePermission('products'), productController.toggleActive);
 router.post('/admin/products/:id/delete', requirePermission('products'), productController.deleteProduct);
 

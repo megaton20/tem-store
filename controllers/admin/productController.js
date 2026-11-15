@@ -34,6 +34,43 @@ async function showProduct(req, res) {
   });
 }
 
+// ---------- image helpers ----------
+async function resolvePrimaryImage(req, currentUrl) {
+  // explicit clear wins only if no new file was provided
+  if (String(req.body.clearPrimary) === '1' && !req.files?.imageFile?.[0]) {
+    return null;
+  }
+  if (req.files?.imageFile?.[0]) {
+    try {
+      return await uploadImageBuffer(req.files.imageFile[0].buffer, 'tem-store/products');
+    } catch (err) {
+      req.session.flashError = `Saved, but the primary image upload failed: ${err.message}`;
+      return currentUrl;
+    }
+  }
+  if (req.body.imageUrl !== undefined && String(req.body.clearPrimary) !== '1') {
+    return req.body.imageUrl || null;
+  }
+  return currentUrl;
+}
+
+async function resolveGallery(req, currentGallery) {
+  let gallery = Array.isArray(currentGallery) ? [...currentGallery] : [];
+  const toRemove = [].concat(req.body.removeGallery || []);
+  gallery = gallery.filter((url) => !toRemove.includes(url));
+
+  if (req.files?.imageFiles?.length) {
+    for (const file of req.files.imageFiles) {
+      try {
+        gallery.push(await uploadImageBuffer(file.buffer, 'tem-store/products'));
+      } catch (err) {
+        req.session.flashError = `Saved, but a gallery image failed to upload: ${err.message}`;
+      }
+    }
+  }
+  return gallery;
+}
+
 async function createProduct(req, res) {
   const {
     name, description, price, categoryId, imageUrl, visibilityTier,
@@ -56,15 +93,8 @@ async function createProduct(req, res) {
   }
 
   const slug = slugify(name, { lower: true, strict: true }) + '-' + Date.now().toString(36).slice(-4);
-
-  let finalImageUrl = imageUrl || null;
-  if (req.file) {
-    try {
-      finalImageUrl = await uploadImageBuffer(req.file.buffer, 'tem-store/products');
-    } catch (err) {
-      req.session.flashError = `Product created, but the image upload failed: ${err.message}`;
-    }
-  }
+  const finalImageUrl = await resolvePrimaryImage(req, imageUrl || null);
+  const gallery = await resolveGallery(req, []);
 
   const product = await Product.create({
     name: name.trim(),
@@ -72,6 +102,7 @@ async function createProduct(req, res) {
     description: description || null,
     price,
     imageUrl: finalImageUrl,
+    gallery,
     categoryId,
     visibilityTier: visibilityTier || 'public',
     fulfillmentType: fulfillmentType || 'in_house',
@@ -105,7 +136,6 @@ async function updateProduct(req, res) {
 
   const errors = [];
   if (!name || !categoryId) errors.push('Name and category are required.');
-  // price required only for super_admin (BM can't change it anyway)
   if (hasPermission(req.currentUser, 'products') && !price) errors.push('Price is required.');
 
   if (errors.length) {
@@ -121,30 +151,21 @@ async function updateProduct(req, res) {
     });
   }
 
-  let finalImageUrl = product.imageUrl;
-  if (req.file) {
-    try {
-      finalImageUrl = await uploadImageBuffer(req.file.buffer, 'tem-store/products');
-    } catch (err) {
-      req.session.flashError = `Saved, but the image upload failed: ${err.message}`;
-    }
-  } else if (imageUrl !== undefined) {
-    finalImageUrl = imageUrl || null;
-  }
+  const finalImageUrl = await resolvePrimaryImage(req, product.imageUrl);
+  const gallery = await resolveGallery(req, product.gallery);
 
   if (name.trim() !== product.name) {
     product.slug = slugify(name, { lower: true, strict: true }) + '-' + Date.now().toString(36).slice(-4);
   }
 
-  // Fields everyone with edit access can change
   const editable = {
     name: name.trim(),
     description: description || null,
     imageUrl: finalImageUrl,
+    gallery,
     categoryId,
   };
 
-  // Fields reserved for super_admin only (silently ignored if a BM submits them)
   if (hasPermission(req.currentUser, 'products')) {
     Object.assign(editable, {
       price,
