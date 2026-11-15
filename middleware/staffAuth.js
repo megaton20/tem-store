@@ -10,7 +10,7 @@
 // reserved for branch managers and above.
 const ROLE_PERMISSIONS = {
   super_admin: ['dashboard', 'products', 'inventory:all', 'transfers', 'orders:all', 'logistics:queue', 'logistics:process', 'logistics:assign', 'logistics:book', 'pos', 'staff', 'batches', 'rider_apps', 'rider:all'],
-  branch_manager: ['dashboard', 'inventory:own', 'orders:own_branch', 'logistics:process', 'logistics:assign', 'logistics:book', 'pos', 'transfers:receive', 'batches:own'],
+  branch_manager: ['dashboard', 'products:edit','inventory:own', 'orders:own_branch', 'logistics:process', 'logistics:assign', 'logistics:book', 'pos', 'transfers:receive', 'batches:own'],
   inventory_staff: ['dashboard', 'inventory:own', 'logistics:process', 'transfers:receive'],
   sales_pos: ['dashboard', 'pos'],
   logistics: ['dashboard', 'orders:all', 'logistics:queue', 'logistics:assign', 'logistics:book', 'rider:all'],
@@ -25,12 +25,14 @@ const ROLE_PERMISSIONS = {
 // the full directory - only super_admin gets to browse every department.
 const ROLE_NAV = {
   super_admin: [
+    { href: '/', label: 'Store Front', skeleton: 'home' },
     { href: '/admin', label: 'Dashboard', skeleton: 'dashboard' },
     { href: '/admin/reports', label: 'Reports', skeleton: 'dashboard' },
     { href: '/admin/products', label: 'Products', skeleton: 'table' },
     { href: '/admin/team', label: 'Team Page', skeleton: 'cards' },
     { href: '/admin/discounts', label: 'Discount Codes', skeleton: 'table' },
     { href: '/admin/inventory', label: 'Inventory', skeleton: 'table' },
+    { href: '/admin/products', label: 'Products', skeleton: 'table' },
     { href: '/admin/transfers', label: 'Stock Transfers', skeleton: 'table' },
     { href: '/admin/orders', label: 'Orders', skeleton: 'table' },
     { href: '/admin/logistics/queue', label: 'Dispatch Queue', skeleton: 'cards' },

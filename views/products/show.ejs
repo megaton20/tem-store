@@ -3,11 +3,34 @@
     <a href="/shop" class="hover:text-caramel">Shop</a> <span class="mx-1">/</span> <%= product.name %>
   </nav>
 
+  <% const galleryImages = [product.imageUrl, ...((product.gallery || []))].filter(Boolean); %>
+
   <div class="grid md:grid-cols-2 gap-10">
-    <div class="aspect-square bg-dough/40 rounded-2xl overflow-hidden flex items-center justify-center">
-      <img src="<%= product.imageUrl %>" alt="<%= product.name %>" class="w-full h-full object-contain p-10" onerror="this.src='https://via.placeholder.com/500x500/EFE0C8/3A2317?text=TEM'">
+    <!-- LEFT: main image + thumbnails -->
+    <div>
+      <div class="aspect-square bg-dough/40 rounded-2xl overflow-hidden flex items-center justify-center">
+        <img id="gallery-main"
+             src="<%= product.imageUrl %>"
+             alt="<%= product.name %>"
+             class="w-full h-full object-contain p-10 transition-opacity duration-150"
+             onerror="this.src='https://via.placeholder.com/500x500/EFE0C8/3A2317?text=TEM'">
+      </div>
+
+      <% if (galleryImages.length > 1) { %>
+        <div class="flex gap-2 mt-3 overflow-x-auto pb-1">
+          <% galleryImages.forEach(function(url, i) { %>
+            <button type="button"
+                    onclick="swapGalleryImage('<%= url %>', this)"
+                    class="gallery-thumb shrink-0 h-16 w-16 rounded-lg overflow-hidden border-2 <%= i === 0 ? 'border-cocoa' : 'border-transparent' %> hover:border-caramel transition">
+              <img src="<%= url %>" alt="<%= product.name %> photo <%= i + 1 %>" class="w-full h-full object-cover"
+                   onerror="this.src='https://via.placeholder.com/80x80/EFE0C8/3A2317?text=IMG'">
+            </button>
+          <% }); %>
+        </div>
+      <% } %>
     </div>
 
+    <!-- RIGHT: details (unchanged apart from layout) -->
     <div>
       <% if (product.Category) { %>
         <span class="text-xs font-semibold uppercase tracking-wide text-forest"><%= product.Category.name %></span>
@@ -32,3 +55,20 @@
     </div>
   </div>
 </section>
+
+<script>
+  function swapGalleryImage(url, btn) {
+    const main = document.getElementById('gallery-main');
+    main.style.opacity = '0.35';
+    setTimeout(() => {
+      main.src = url;
+      main.style.opacity = '1';
+    }, 120);
+    document.querySelectorAll('.gallery-thumb').forEach((el) => {
+      el.classList.remove('border-cocoa');
+      el.classList.add('border-transparent');
+    });
+    btn.classList.remove('border-transparent');
+    btn.classList.add('border-cocoa');
+  }
+</script> 

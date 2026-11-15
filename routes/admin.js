@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { requireStaff, requirePermission, ROLE_NAV } = require('../middleware/staffAuth');
+const { requireStaff, requirePermission,hasPermission, ROLE_NAV } = require('../middleware/staffAuth');
 
 const dashboardController = require('../controllers/admin/dashboardController');
 const inventoryController = require('../controllers/admin/inventoryController');
@@ -26,6 +26,9 @@ const adminProfileController = require('../controllers/admin/profileController')
 router.use(requireStaff);
 router.use((req, res, next) => {
   res.locals.roleNav = ROLE_NAV[req.currentUser.role] || [];
+    res.locals.currentUser = req.currentUser; 
+     res.locals.hasPermission = hasPermission;
+    
   next();
 });
 
@@ -112,10 +115,16 @@ router.post('/admin/pos-applications/:id/approve', requirePermission('rider_apps
 router.post('/admin/pos-applications/:id/reject', requirePermission('rider_apps'), posAppController.rejectApplication);
 router.post('/admin/pos-applications/toggle', requirePermission('rider_apps'), posAppController.toggleOpen);
 
-// Products - super_admin only (creating/deactivating catalog items)
-router.get('/admin/products', requirePermission('products'), productController.listProducts);
-router.post('/admin/products', requirePermission('products'), upload.single('imageFile'), productController.createProduct);
+// Products
+// - super_admin: full control (create, edit, toggle, delete)
+// - branch_manager: edit details only (no create/delete/toggle, price & visibility locked in controller)
+router.get('/admin/products',             requirePermission('products', 'products:edit'), productController.listProducts);
+router.get('/admin/products/:id',         requirePermission('products', 'products:edit'), productController.showProduct);
+router.post('/admin/products/:id',        requirePermission('products', 'products:edit'), upload.single('imageFile'), productController.updateProduct);
+
+router.post('/admin/products',            requirePermission('products'), upload.single('imageFile'), productController.createProduct);
 router.post('/admin/products/:id/toggle', requirePermission('products'), productController.toggleActive);
+router.post('/admin/products/:id/delete', requirePermission('products'), productController.deleteProduct);
 
 // Team page management - super_admin only
 router.get('/admin/team', requirePermission('products'), teamController.listMembers);

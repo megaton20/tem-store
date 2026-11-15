@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title><%= typeof title !== 'undefined' ? title : 'Admin — TEM Store' %></title>
   <link rel="stylesheet" href="/css/output.css">
 </head>
@@ -28,51 +28,16 @@
       </div>
     </aside>
 
-    <!-- Mobile nav drawer: same content as the desktop sidebar, off-canvas
-         and toggled by the hamburger button below. Only exists in the DOM
-         on mobile widths (md:hidden), but the toggle JS works regardless. -->
-    <div id="mobile-nav-backdrop" class="md:hidden" style="display:none; position:fixed; inset:0; z-index:40; background:rgba(35,52,23,0.5);" onclick="closeMobileNav()"></div>
-    <aside id="mobile-nav-drawer" class="md:hidden bg-cocoa text-cream flex flex-col" style="position:fixed; top:0; bottom:0; left:0; z-index:50; width:18rem; transform:translateX(-100%); transition:transform 0.2s ease;">
-      <div class="px-6 py-5 border-b border-cream/10 flex items-start justify-between">
-        <div>
-          <a href="/admin" class="font-display text-xl font-bold">TEM<span class="text-caramel">Admin</span></a>
-          <p class="text-xs text-cream/50 mt-1"><%= currentUser.fullName %> &middot; <%= currentUser.role.replace(/_/g, ' ') %></p>
-        </div>
-        <button type="button" onclick="closeMobileNav()" class="text-cream/60 text-2xl leading-none">&times;</button>
-      </div>
-      <nav class="flex-1 px-3 py-4 space-y-1 text-sm overflow-y-auto">
-        <% (typeof roleNav !== 'undefined' ? roleNav : []).forEach(function(item) { %>
-          <a href="<%= item.href %>" data-skeleton="<%= item.skeleton || 'table' %>" class="skeleton-link block px-3 py-2 rounded-lg hover:bg-cream/10" onclick="closeMobileNav()"><%= item.label %></a>
-        <% }); %>
-      </nav>
-      <div class="px-3 py-4 border-t border-cream/10 space-y-1">
-        <a href="/admin/profile" data-skeleton="form" class="skeleton-link block px-3 py-2 rounded-lg hover:bg-cream/10 text-sm text-cream/70" onclick="closeMobileNav()">My Profile</a>
-        <a href="/" class="block px-3 py-2 rounded-lg hover:bg-cream/10 text-sm text-cream/70">&larr; Back to Storefront</a>
-        <form action="/logout" method="POST">
-          <button type="submit" class="w-full text-left px-3 py-2 rounded-lg hover:bg-cream/10 text-sm text-cream/70">Log out</button>
-        </form>
-      </div>
-    </aside>
-
-    <main class="flex-1 min-w-0 relative">
-      <header class="md:hidden bg-cocoa text-cream px-4 py-3 flex items-center justify-between">
-        <button type="button" onclick="openMobileNav()" aria-label="Open menu" class="p-1 -ml-1">
-          <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
-          </svg>
-        </button>
+    <main class="flex-1 min-w-0 relative flex flex-col">
+      <header class="md:hidden bg-cocoa text-cream px-4 py-3 flex items-center justify-between flex-shrink-0">
         <span class="font-display font-bold">TEM<span class="text-caramel">Admin</span></span>
-        <span class="w-6"></span>
+        <span class="text-xs text-cream/60"><%= currentUser.fullName %></span>
       </header>
 
-      <!-- Skeleton overlay: one variant per page layout shape, toggled by JS
-           on nav-link click so navigation feels immediate even on a slow
-           connection. Hidden by default; only the matching variant shows. -->
       <div id="skeleton-overlay" class="hidden absolute inset-0 z-40 bg-dough/30 p-6 sm:p-8 overflow-y-auto">
-
         <div data-variant="dashboard" class="hidden">
           <div class="shimmer h-7 w-48 rounded-lg mb-6"></div>
-          <div class="grid grid-cols-2 sm:grid-cols-4 gap-5 mb-8">
+          <div class="grid grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
             <% for (let i=0;i<4;i++) { %>
               <div class="card p-5"><div class="shimmer h-3 w-20 rounded mb-3"></div><div class="shimmer h-7 w-12 rounded"></div></div>
             <% } %>
@@ -82,7 +47,6 @@
             <% for (let i=0;i<4;i++) { %><div class="shimmer h-4 w-full rounded mb-3"></div><% } %>
           </div>
         </div>
-
         <div data-variant="table" class="hidden">
           <div class="flex items-center justify-between mb-6">
             <div class="shimmer h-7 w-40 rounded-lg"></div>
@@ -100,7 +64,6 @@
             <% } %>
           </div>
         </div>
-
         <div data-variant="cards" class="hidden">
           <div class="shimmer h-7 w-40 rounded-lg mb-6"></div>
           <div class="grid sm:grid-cols-2 gap-4">
@@ -113,7 +76,6 @@
             <% } %>
           </div>
         </div>
-
         <div data-variant="form" class="hidden max-w-lg">
           <div class="shimmer h-7 w-48 rounded-lg mb-6"></div>
           <div class="card p-6 space-y-4">
@@ -126,7 +88,6 @@
             <div class="shimmer h-11 w-full rounded-full mt-2"></div>
           </div>
         </div>
-
         <div data-variant="pos" class="hidden">
           <div class="shimmer h-7 w-40 rounded-lg mb-6"></div>
           <div class="grid lg:grid-cols-3 gap-6">
@@ -147,10 +108,9 @@
             </div>
           </div>
         </div>
-
       </div>
 
-      <div class="p-6 sm:p-8" id="admin-content">
+      <div class="p-4 sm:p-8 overflow-x-hidden flex-1 pb-24 md:pb-8" id="admin-content">
         <% if (typeof flashError !== 'undefined' && flashError) { %>
           <div class="bg-caramel-dark/10 border border-caramel-dark/30 text-caramel-dark rounded-xl px-4 py-3 mb-6 text-sm"><%= flashError %></div>
         <% } %>
@@ -159,51 +119,70 @@
     </main>
   </div>
 
+  <!-- Mobile "More" sheet backdrop -->
+  <div id="more-backdrop" class="md:hidden" style="display:none; position:fixed; inset:0; z-index:60; background:rgba(35,52,23,0.5);" onclick="closeMoreSheet()"></div>
+
+  <!-- Mobile "More" sheet: ALL nav items + account links -->
+  <div id="more-sheet" class="md:hidden bg-cocoa text-cream" style="position:fixed; left:0; right:0; bottom:0; z-index:70; max-height:80vh; transform:translateY(100%); transition:transform 0.2s ease; border-radius:1rem 1rem 0 0; padding-bottom:env(safe-area-inset-bottom);">
+    <div class="flex items-center justify-between px-5 py-3 border-b border-cream/10">
+      <p class="font-display font-bold">Menu</p>
+      <button type="button" onclick="closeMoreSheet()" aria-label="Close menu" class="text-cream/60 text-2xl leading-none">&times;</button>
+    </div>
+    <div class="overflow-y-auto" style="max-height:calc(80vh - 3.5rem);">
+      <nav class="px-3 py-3 space-y-1 text-sm">
+        <% (typeof roleNav !== 'undefined' ? roleNav : []).forEach(function(item) { %>
+          <a href="<%= item.href %>" data-skeleton="<%= item.skeleton || 'table' %>" class="skeleton-link block px-3 py-3 rounded-lg hover:bg-cream/10"><%= item.label %></a>
+        <% }); %>
+      </nav>
+      <div class="px-3 pb-4 pt-2 border-t border-cream/10 space-y-1 text-sm">
+        <a href="/admin/profile" data-skeleton="form" class="skeleton-link block px-3 py-3 rounded-lg hover:bg-cream/10 text-cream/80">My Profile</a>
+        <a href="/admin/docs/<%= currentUser.role %>" class="block px-3 py-3 rounded-lg hover:bg-cream/10 text-cream/80">Role Guide</a>
+        <a href="/" class="block px-3 py-3 rounded-lg hover:bg-cream/10 text-cream/80">&larr; Back to Storefront</a>
+        <form action="/logout" method="POST">
+          <button type="submit" class="w-full text-left px-3 py-3 rounded-lg hover:bg-cream/10 text-cream/80">Log out</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Mobile bottom nav -->
+  <nav class="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-cocoa text-cream border-t border-cream/10" style="padding-bottom: env(safe-area-inset-bottom);">
+    <div class="flex items-stretch justify-around text-xs">
+      <% (typeof roleNav !== 'undefined' ? roleNav : []).slice(0, 4).forEach(function(item) { %>
+        <a href="<%= item.href %>" data-skeleton="<%= item.skeleton || 'table' %>" class="skeleton-link flex-1 flex flex-col items-center justify-center py-2 gap-1 hover:bg-cream/10">
+          <span class="text-base leading-none">•</span>
+          <span class="truncate max-w-full px-1"><%= item.label %></span>
+        </a>
+      <% }); %>
+      <button type="button" onclick="openMoreSheet()" class="flex-1 flex flex-col items-center justify-center py-2 gap-1 hover:bg-cream/10">
+        <span class="text-base leading-none">⋯</span>
+        <span>More</span>
+      </button>
+    </div>
+  </nav>
+
   <script>
-    // Shows the matching skeleton variant, then lets the click/submit
-    // proceed as normal - the overlay just covers the gap between click
-    // and the next page actually painting, so navigation feels instant
-    // even on a slow branch connection.
-    //
-    // Three things that were broken before:
-    // 1. It showed instantly, so a fast (local) navigation caused a jarring
-    //    flash of the loader for a split second - now it waits 150ms first,
-    //    so quick loads never show it at all.
-    // 2. There was no upper bound - if a request ever hung (bad connection,
-    //    server stall), the overlay stayed up forever with no explanation.
-    //    Now it auto-hides after 10s and shows a short note instead of
-    //    silently sitting there.
-    // 3. Pressing the browser Back button after a skeleton was shown could
-    //    restore the page from cache with the overlay still visible, since
-    //    nothing ever told it to hide again. `pageshow` fixes that.
+    function openMoreSheet() {
+      document.getElementById('more-backdrop').style.display = 'block';
+      document.getElementById('more-sheet').style.transform = 'translateY(0)';
+    }
+    function closeMoreSheet() {
+      document.getElementById('more-backdrop').style.display = 'none';
+      document.getElementById('more-sheet').style.transform = 'translateY(100%)';
+    }
+    window.addEventListener('pageshow', closeMoreSheet);
+
     let skeletonShowTimer = null;
     let skeletonSafetyTimer = null;
-
-    // Mobile nav drawer - slides in from the left, backdrop click or the
-    // × closes it. Reset on pageshow too, same reasoning as the skeleton
-    // overlay: a page restored from bfcache shouldn't come back with the
-    // drawer stuck open from before the person navigated away.
-    // Mobile nav drawer - slides in from the left, backdrop click or the
-    // × closes it. Driven by inline styles set directly here (not Tailwind
-    // classes), so it works even if output.css hasn't been rebuilt since
-    // these elements were added - nothing to compile, it just works.
-    function openMobileNav() {
-      document.getElementById('mobile-nav-drawer').style.transform = 'translateX(0)';
-      document.getElementById('mobile-nav-backdrop').style.display = 'block';
-    }
-    function closeMobileNav() {
-      document.getElementById('mobile-nav-drawer').style.transform = 'translateX(-100%)';
-      document.getElementById('mobile-nav-backdrop').style.display = 'none';
-    }
-    window.addEventListener('pageshow', closeMobileNav);
 
     function showSkeleton(variant) {
       clearTimeout(skeletonShowTimer);
       skeletonShowTimer = setTimeout(() => {
         const overlay = document.getElementById('skeleton-overlay');
+        if (!overlay) return;
         overlay.querySelectorAll('[data-variant]').forEach((el) => el.classList.add('hidden'));
         const match = overlay.querySelector('[data-variant="' + variant + '"]') || overlay.querySelector('[data-variant="table"]');
-        match.classList.remove('hidden');
+        if (match) match.classList.remove('hidden');
         overlay.classList.remove('hidden');
 
         clearTimeout(skeletonSafetyTimer);
@@ -224,6 +203,7 @@
       clearTimeout(skeletonShowTimer);
       clearTimeout(skeletonSafetyTimer);
       const overlay = document.getElementById('skeleton-overlay');
+      if (!overlay) return;
       overlay.classList.add('hidden');
       const note = overlay.querySelector('#skeleton-slow-note');
       if (note) note.remove();
@@ -231,23 +211,18 @@
 
     document.querySelectorAll('.skeleton-link').forEach((link) => {
       link.addEventListener('click', function (e) {
-        if (e.metaKey || e.ctrlKey || e.shiftKey) return; // let "open in new tab" alone
+        if (e.metaKey || e.ctrlKey || e.shiftKey) return;
+        closeMoreSheet();
         showSkeleton(this.dataset.skeleton || 'table');
       });
     });
 
-    // Also cover POST-form navigations that redirect to a new page (e.g.
-    // "Add Product" style forms that aren't modals) - same table skeleton
-    // by default since most of those land back on a list page.
     document.querySelectorAll('form[data-skeleton-on-submit]').forEach((form) => {
       form.addEventListener('submit', function () {
         showSkeleton(this.dataset.skeletonOnSubmit);
       });
     });
 
-    // A page restored from the back/forward cache is a page that never
-    // actually reloaded - if a skeleton was showing when the person
-    // navigated away, this is what clears it.
     window.addEventListener('pageshow', hideSkeleton);
   </script>
 </body>

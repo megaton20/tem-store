@@ -1,0 +1,117 @@
+<% const canChangeGlobal = hasPermission(currentUser, 'products'); %>
+
+<div class="flex items-center justify-between mb-6">
+  <div>
+    <a href="/admin/products" class="text-sm text-cocoa-light hover:text-cocoa">&larr; Back to products</a>
+    <h1 class="text-2xl font-bold text-cocoa mt-1"><%= product.name %></h1>
+  </div>
+  <% if (canChangeGlobal) { %>
+    <div class="flex gap-2">
+      <form action="/admin/products/<%= product.id %>/toggle" method="POST">
+        <button class="btn-secondary !py-2 text-sm"><%= product.isActive ? 'Deactivate' : 'Activate' %></button>
+      </form>
+      <button type="button" onclick="openDeleteModal()" class="btn-secondary !py-2 text-sm !text-caramel-dark border-caramel-dark/40">Delete</button>
+    </div>
+  <% } %>
+</div>
+
+<% if (errors && errors.length) { %>
+  <div class="bg-caramel-dark/10 border border-caramel-dark/30 text-caramel-dark rounded-xl px-4 py-3 mb-6 text-sm">
+    <ul class="list-disc list-inside"><% errors.forEach(function(e){ %><li><%= e %></li><% }); %></ul>
+  </div>
+<% } %>
+
+<% if (!canChangeGlobal) { %>
+  <div class="bg-dough/40 border border-dough text-cocoa-light rounded-xl px-4 py-3 mb-6 text-sm">
+    Price, visibility, sourcing, and lifecycle actions are managed by head office. You can edit the name, description, image, and category here.
+  </div>
+<% } %>
+
+<form action="/admin/products/<%= product.id %>" method="POST" enctype="multipart/form-data" class="card p-6 grid sm:grid-cols-2 gap-4">
+  <div><label class="block text-sm font-medium text-cocoa mb-2">Name</label><input name="name" required class="input-field" value="<%= product.name %>"></div>
+  <div>
+    <label class="block text-sm font-medium text-cocoa mb-2">Price (₦)</label>
+    <input type="number" name="price" required class="input-field <%= canChangeGlobal ? '' : 'bg-dough/40 cursor-not-allowed' %>" value="<%= product.price %>" <%= canChangeGlobal ? '' : 'disabled' %>>
+  </div>
+
+  <div>
+    <label class="block text-sm font-medium text-cocoa mb-2">Category</label>
+    <select name="categoryId" required class="input-field">
+      <% categories.forEach(function(c){ %><option value="<%= c.id %>" <%= c.id === product.categoryId ? 'selected' : '' %>><%= c.name %></option><% }); %>
+    </select>
+  </div>
+
+  <div>
+    <label class="block text-sm font-medium text-cocoa mb-2">Visibility</label>
+    <select name="visibilityTier" class="input-field <%= canChangeGlobal ? '' : 'bg-dough/40 cursor-not-allowed' %>" <%= canChangeGlobal ? '' : 'disabled' %>>
+      <% ['public','discreet','exclusive'].forEach(function(t){ %><option value="<%= t %>" <%= product.visibilityTier === t ? 'selected' : '' %>><%= t === 'exclusive' ? 'Vault (Exclusive)' : t[0].toUpperCase()+t.slice(1) %></option><% }); %>
+    </select>
+  </div>
+
+  <div class="sm:col-span-2">
+    <label class="block text-sm font-medium text-cocoa mb-2">Product Photo</label>
+    <% if (product.imageUrl) { %><img src="<%= product.imageUrl %>" class="h-24 w-24 object-cover rounded-lg mb-2"><% } %>
+    <input type="file" name="imageFile" accept="image/*" class="input-field">
+    <input type="text" name="imageUrl" class="input-field mt-2" placeholder="/images/product.png" value="<%= product.imageUrl || '' %>">
+  </div>
+
+  <div class="sm:col-span-2"><label class="block text-sm font-medium text-cocoa mb-2">Description</label><textarea name="description" rows="3" class="input-field"><%= product.description || '' %></textarea></div>
+
+  <div>
+    <label class="block text-sm font-medium text-cocoa mb-2">Sourcing</label>
+    <select name="fulfillmentType" id="fulfillment-type" class="input-field <%= canChangeGlobal ? '' : 'bg-dough/40 cursor-not-allowed' %>" <%= canChangeGlobal ? '' : 'disabled' %>>
+      <option value="in_house" <%= product.fulfillmentType === 'in_house' ? 'selected' : '' %>>In-house</option>
+      <option value="third_party" <%= product.fulfillmentType === 'third_party' ? 'selected' : '' %>>Third-party</option>
+    </select>
+  </div>
+  <div id="lead-time-field" class="<%= product.fulfillmentType === 'third_party' && canChangeGlobal ? '' : 'hidden' %>">
+    <label class="block text-sm font-medium text-cocoa mb-2">Lead Time (days)</label>
+    <input type="number" name="leadTimeDays" class="input-field" value="<%= product.leadTimeDays || 7 %>" <%= canChangeGlobal ? '' : 'disabled' %>>
+  </div>
+  <div class="sm:col-span-2 <%= product.fulfillmentType === 'third_party' && canChangeGlobal ? '' : 'hidden' %>" id="supplier-field">
+    <label class="block text-sm font-medium text-cocoa mb-2">Supplier Name</label>
+    <input type="text" name="supplierName" class="input-field" value="<%= product.supplierName || '' %>" <%= canChangeGlobal ? '' : 'disabled' %>>
+  </div>
+
+  <div class="sm:col-span-2 flex gap-3 border-t border-dough pt-4">
+    <a href="/admin/products" class="btn-secondary flex-1 text-center">Cancel</a>
+    <button type="submit" class="btn-primary flex-1">Save Changes</button>
+  </div>
+</form>
+
+<% if (canChangeGlobal) { %>
+<!-- Delete warning modal -->
+<div id="delete-modal" class="fixed inset-0 z-50 hidden items-center justify-center p-4" style="background: rgba(35,52,23,0.5);">
+  <div class="bg-cream rounded-2xl shadow-xl max-w-md w-full p-6">
+    <h2 class="font-bold text-cocoa text-lg mb-2">Delete “<%= product.name %>”?</h2>
+    <p class="text-sm text-cocoa-light mb-3">This cannot be undone. Before deleting, we will:</p>
+    <ul class="text-sm text-cocoa-light list-disc list-inside mb-4 space-y-1">
+      <li>Remove it from <strong><%= cartUsage %></strong> active cart<%= cartUsage === 1 ? '' : 's' %></li>
+      <% if (orderUsage > 0) { %>
+        <li class="text-caramel-dark">⚠ It appears in <strong><%= orderUsage %></strong> past order<%= orderUsage === 1 ? '' : 's' %>, so it will be <strong>deactivated instead of deleted</strong> to preserve order history.</li>
+      <% } else { %>
+        <li>Clear its branch inventory records</li>
+        <li>Permanently remove the product</li>
+      <% } %>
+    </ul>
+    <form action="/admin/products/<%= product.id %>/delete" method="POST" class="flex gap-3">
+      <button type="button" onclick="closeDeleteModal()" class="btn-secondary flex-1">Cancel</button>
+      <button type="submit" class="btn-primary flex-1 !bg-caramel-dark">
+        <%= orderUsage > 0 ? 'Yes, deactivate' : 'Yes, delete' %>
+      </button>
+    </form>
+  </div>
+</div>
+<% } %>
+
+<script>
+  function openDeleteModal(){ const m=document.getElementById('delete-modal'); if(!m) return; m.classList.remove('hidden'); m.classList.add('flex'); }
+  function closeDeleteModal(){ const m=document.getElementById('delete-modal'); if(!m) return; m.classList.add('hidden'); m.classList.remove('flex'); }
+  const ft = document.getElementById('fulfillment-type');
+  if (ft && !ft.disabled) {
+    ft.addEventListener('change', function(){
+      document.getElementById('lead-time-field').classList.toggle('hidden', this.value !== 'third_party');
+      document.getElementById('supplier-field').classList.toggle('hidden', this.value !== 'third_party');
+    });
+  }
+</script>

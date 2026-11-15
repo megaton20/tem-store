@@ -1,7 +1,6 @@
-<div class="flex items-center justify-between mb-6">
-  <h1 class="text-2xl font-bold text-cocoa">Products</h1>
+<% if (hasPermission(currentUser, 'products')) { %>
   <button type="button" onclick="openProductModal()" class="btn-primary !py-2 text-sm">+ Add Product</button>
-</div>
+<% } %>
 
 <% if (errors && errors.length) { %>
   <div class="bg-caramel-dark/10 border border-caramel-dark/30 text-caramel-dark rounded-xl px-4 py-3 mb-6 text-sm">
@@ -28,6 +27,8 @@
             <form action="/admin/products/<%= p.id %>/toggle" method="POST">
               <button type="submit" class="btn-secondary !py-1 !px-3 text-xs"><%= p.isActive ? 'Deactivate' : 'Activate' %></button>
             </form>
+
+            <a href="/admin/products/<%= p.id %>" class="btn-secondary !py-1 !px-3 text-xs"> view</a>
           </td>
         </tr>
       <% }); %>
