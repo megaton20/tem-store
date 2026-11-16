@@ -61,9 +61,9 @@
             </div>
             <div>
               <label class="block text-sm font-medium text-cocoa mb-2">City</label>
-              <select name="deliveryCity" id="city-select" required class="input-field" onchange="updateStateFromCity(); updateFeePreview();">
-                <option value="">Select a state first</option>
-              </select>
+             <select name="deliveryCity" id="city-select" class="input-field" onchange="updateStateFromCity(); updateFeePreview();">
+              <option value="">Select a state first</option>
+            </select>
               <input type="hidden" name="deliveryState" id="state-hidden">
             </div>
           </div>
@@ -109,12 +109,29 @@
 </section>
 
 <script>
-  function toggleDelivery(method) {
-    document.getElementById('pickup-fields').classList.toggle('hidden', method !== 'pickup');
-    document.getElementById('home-fields').classList.toggle('hidden', method !== 'home');
-  }
 
-  // Every city we deliver to, grouped by state - embedded server-side so the
+ function toggleDelivery(method) {
+  const pickupFields = document.getElementById('pickup-fields');
+  const homeFields = document.getElementById('home-fields');
+  const citySelect = document.getElementById('city-select');
+  const addressInput = document.querySelector('[name="deliveryAddress"]');
+
+  const isHome = method === 'home';
+
+  pickupFields.classList.toggle('hidden', isHome);
+  homeFields.classList.toggle('hidden', !isHome);
+  citySelect.required = isHome;
+  citySelect.disabled = !isHome;
+
+  if (addressInput) {
+    addressInput.required = isHome;
+    addressInput.disabled = !isHome;
+  }
+}
+
+// Initialize state based on the default (pickup) selection
+toggleDelivery(document.querySelector('input[name="deliveryMethod"]:checked').value);
+
   // city dropdown is always exactly what's in the database, never free text.
   const ZONES_BY_STATE = <%- JSON.stringify(zonesByState) %>;
 

@@ -26,6 +26,7 @@ async function showCheckout(req, res) {
     DeliveryZone.findAll({ where: { isActive: true }, order: [['state', 'ASC'], ['sortOrder', 'ASC'], ['city', 'ASC']] }),
   ]);
 
+  
   res.render('checkout', {
     title: 'Checkout — TEM Store',
     items,
@@ -64,9 +65,12 @@ async function initiateCheckout(req, res) {
     : null;
 
   if (deliveryMethod === 'pickup') {
+    
     const location = await Branch.findOne({ where: { id: branchId, isActive: true, isPickupEnabled: true } });
+    console.log(location);
+    
     if (!location) {
-      return renderCheckoutError(req, res, 'Please choose a valid pickup location.');
+      return renderCheckoutError(req, res, 'Please choose another valid pickup location.');
     }
     const canFulfill = await inventoryService.branchCanFulfill(location.id, cartItemsForStock);
     if (!canFulfill) {

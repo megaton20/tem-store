@@ -1,16 +1,4 @@
-/**
- * Records a new production batch and generates one unique, single-use
- * verification code per unit produced. Stock lands at a branch (default:
- * the Central Production branch) via the inventory service, so it's
- * logged and ready to transfer out to retail kiosks.
- *
- * Usage:
- *   node seeders/newBatch.js <product-slug> <quantity> [--branch=<branch-slug>] ["notes"]
- *
- * Examples:
- *   node seeders/newBatch.js classic-chocolate-chip 200 "August batch, morning run"
- *   node seeders/newBatch.js classic-chocolate-chip 200 --branch=tem-kiosk-marian-market "Direct to kiosk"
- */
+
 require('dotenv').config();
 const fs = require('fs');
 const path = require('path');
