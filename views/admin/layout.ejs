@@ -123,12 +123,12 @@
   <div id="more-backdrop" class="md:hidden" style="display:none; position:fixed; inset:0; z-index:60; background:rgba(35,52,23,0.5);" onclick="closeMoreSheet()"></div>
 
   <!-- Mobile "More" sheet: ALL nav items + account links -->
-  <div id="more-sheet" class="md:hidden bg-cocoa text-cream" style="position:fixed; left:0; right:0; bottom:0; z-index:70; max-height:80vh; transform:translateY(100%); transition:transform 0.2s ease; border-radius:1rem 1rem 0 0; padding-bottom:env(safe-area-inset-bottom);">
+  <div id="more-sheet" class="md:hidden bg-cocoa text-cream" style="position:fixed; left:0; right:0; bottom:0; z-index:70; max-height:90vh; transform:translateY(100%); transition:transform 0.2s ease; border-radius:1rem 1rem 0 0; padding-bottom:env(safe-area-inset-bottom);">
     <div class="flex items-center justify-between px-5 py-3 border-b border-cream/10">
       <p class="font-display font-bold">Menu</p>
       <button type="button" onclick="closeMoreSheet()" aria-label="Close menu" class="text-cream/60 text-2xl leading-none">&times;</button>
     </div>
-    <div class="overflow-y-auto" style="max-height:calc(80vh - 3.5rem);">
+    <div class="overflow-y-auto" style="max-height:calc(95vh - 3.5rem);">
       <nav class="px-3 py-3 space-y-1 text-sm">
         <% (typeof roleNav !== 'undefined' ? roleNav : []).forEach(function(item) { %>
           <a href="<%= item.href %>" data-skeleton="<%= item.skeleton || 'table' %>" class="skeleton-link block px-3 py-3 rounded-lg hover:bg-cream/10"><%= item.label %></a>
